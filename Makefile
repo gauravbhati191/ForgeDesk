@@ -5,6 +5,7 @@ endif
 
 SOLUTION := ForgeDesk.sln
 CONFIGURATION ?= Release
+FRESH_DATABASE := $(CURDIR)/artifacts/forgedesk-fresh.db
 
 .PHONY: restore build test test-unit test-integration migrate-fresh publish clean
 
@@ -27,8 +28,9 @@ test-integration: build
 migrate-fresh: build
 	DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 $(DOTNET) tool restore
 	mkdir -p artifacts
-	rm -f artifacts/forgedesk-fresh.db artifacts/forgedesk-fresh.db-shm artifacts/forgedesk-fresh.db-wal
-	FORGEDESK_DATABASE_PATH=./artifacts/forgedesk-fresh.db DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 $(DOTNET) tool run dotnet-ef database update --project ForgeDesk.Infrastructure/ForgeDesk.Infrastructure.csproj --startup-project ForgeDesk.Infrastructure/ForgeDesk.Infrastructure.csproj
+	rm -f "$(FRESH_DATABASE)" "$(FRESH_DATABASE)-shm" "$(FRESH_DATABASE)-wal"
+	rm -f ForgeDesk.Infrastructure/artifacts/forgedesk-fresh.db ForgeDesk.Infrastructure/artifacts/forgedesk-fresh.db-shm ForgeDesk.Infrastructure/artifacts/forgedesk-fresh.db-wal
+	FORGEDESK_DATABASE_PATH="$(FRESH_DATABASE)" DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 $(DOTNET) tool run dotnet-ef database update --project ForgeDesk.Infrastructure/ForgeDesk.Infrastructure.csproj --startup-project ForgeDesk.Infrastructure/ForgeDesk.Infrastructure.csproj
 
 publish: build
 	DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 $(DOTNET) publish ForgeDesk.App/ForgeDesk.App.csproj --configuration $(CONFIGURATION) --runtime win-x64 --self-contained false --output artifacts/publish/win-x64 --no-restore
