@@ -1,0 +1,127 @@
+<UserControl x:Class="ForgeDesk.Presentation.Views.ProjectsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:ForgeDesk.Presentation.Controls"
+             xmlns:converters="clr-namespace:ForgeDesk.Presentation.Converters">
+    <UserControl.Resources>
+        <converters:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter" />
+    </UserControl.Resources>
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="32,28,32,36">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="WORKSPACE" Style="{StaticResource PageEyebrowStyle}" />
+                    <TextBlock Margin="0,8,0,0"
+                               Text="Projects"
+                               Style="{StaticResource PageTitleStyle}" />
+                    <TextBlock Margin="0,8,0,0"
+                               Text="Open a folder or return to a project from this session."
+                               Style="{StaticResource PageSubtitleStyle}" />
+                </StackPanel>
+                <Button Grid.Column="1"
+                        Margin="12,0,8,0"
+                        VerticalAlignment="Center"
+                        AutomationProperties.Name="Refresh recent projects"
+                        Command="{Binding LoadRecentProjectsCommand}"
+                        Content="Refresh"
+                        Style="{StaticResource SecondaryButtonStyle}" />
+                <Button Grid.Column="2"
+                        MinWidth="140"
+                        VerticalAlignment="Center"
+                        AutomationProperties.Name="Open a project folder"
+                        Command="{Binding OpenProjectCommand}"
+                        Content="Open project"
+                        Style="{StaticResource PrimaryButtonStyle}" />
+            </Grid>
+
+            <Border Margin="0,26,0,0" Style="{StaticResource CardBorderStyle}">
+                <StackPanel>
+                    <TextBlock Text="Recent projects" Style="{StaticResource CardTitleStyle}" />
+                    <TextBlock Margin="0,5,0,0"
+                               Text="These entries are persisted locally and can be reopened after a restart."
+                               Style="{StaticResource BodyTextStyle}" />
+
+                    <TextBlock Margin="0,24,0,12"
+                               HorizontalAlignment="Center"
+                               Text="No recent projects yet. Open a folder to add one."
+                               Style="{StaticResource BodyTextStyle}"
+                               Visibility="{Binding HasRecentProjects, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+
+                    <ItemsControl ItemsSource="{Binding RecentProjects}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Margin="0,8,0,0"
+                                        Padding="12"
+                                        Background="{DynamicResource SurfaceAltBrush}"
+                                        BorderBrush="{DynamicResource BorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="8">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <controls:VectorIcon Grid.Column="0"
+                                                             Width="22"
+                                                             Height="22"
+                                                             Margin="0,0,12,0"
+                                                             VerticalAlignment="Top"
+                                                             IconKey="Icon.Projects"
+                                                             Foreground="{DynamicResource AccentBrush}" />
+                                        <StackPanel Grid.Column="1" MinWidth="0">
+                                            <TextBlock Text="{Binding DisplayName}"
+                                                       Style="{StaticResource CardTitleStyle}" />
+                                            <TextBlock Margin="0,3,0,0"
+                                                       Text="{Binding Path}"
+                                                       Style="{StaticResource BodyTextStyle}"
+                                                       TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Margin="0,4,0,0"
+                                                       Foreground="{DynamicResource SubtleTextBrush}"
+                                                       FontSize="11"
+                                                       Text="{Binding ProjectTypeLabel}" />
+                                            <TextBlock Margin="0,3,0,0"
+                                                       Foreground="{DynamicResource SubtleTextBrush}"
+                                                       FontSize="11"
+                                                       Text="{Binding FileSummary}" />
+                                            <TextBlock Margin="0,3,0,0"
+                                                       Foreground="{DynamicResource SubtleTextBrush}"
+                                                       FontSize="11"
+                                                       Text="{Binding AvailabilityLabel}" />
+                                            <TextBlock Margin="0,3,0,0"
+                                                       Foreground="{DynamicResource WarningBrush}"
+                                                       FontSize="11"
+                                                       Text="{Binding Warning}"
+                                                       TextWrapping="Wrap" />
+                                        </StackPanel>
+                                        <Button Grid.Column="2"
+                                                Margin="14,0,8,0"
+                                                VerticalAlignment="Center"
+                                                AutomationProperties.Name="Open this recent project"
+                                                Command="{Binding DataContext.OpenRecentProjectCommand, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                                                CommandParameter="{Binding}"
+                                                Content="Open"
+                                                Style="{StaticResource SecondaryButtonStyle}" />
+                                        <Button Grid.Column="3"
+                                                VerticalAlignment="Center"
+                                                AutomationProperties.Name="Remove this recent project"
+                                                Command="{Binding DataContext.RemoveRecentProjectCommand, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                                                CommandParameter="{Binding}"
+                                                Content="Remove"
+                                                Style="{StaticResource IconButtonStyle}" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

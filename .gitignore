@@ -1,0 +1,21 @@
+# .NET build output
+**/bin/
+**/obj/
+.vs/
+*.user
+*.suo
+
+# Local SDK and generated restore artifacts
+.dotnet/
+.dotnet-install.sh
+
+# Local ForgeDesk data and logs
+*.db
+*.db-shm
+*.db-wal
+logs/
+artifacts/
+
+# IDE/editor files
+.vscode/
+.idea/

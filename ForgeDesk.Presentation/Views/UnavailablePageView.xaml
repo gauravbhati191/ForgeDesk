@@ -1,0 +1,37 @@
+<UserControl x:Class="ForgeDesk.Presentation.Views.UnavailablePageView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:ForgeDesk.Presentation.Controls">
+    <Grid Margin="32,28,32,36">
+        <Border MaxWidth="640"
+                Padding="28"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Style="{StaticResource CardBorderStyle}">
+            <StackPanel>
+                <controls:VectorIcon Width="32"
+                                     Height="32"
+                                     IconKey="Icon.Settings"
+                                     Foreground="{DynamicResource SubtleTextBrush}" />
+                <TextBlock Margin="0,20,0,0"
+                           Text="{Binding Title}"
+                           Style="{StaticResource PageTitleStyle}" />
+                <TextBlock Margin="0,10,0,0"
+                           Text="Not available in Phase 1"
+                           Style="{StaticResource PageEyebrowStyle}" />
+                <TextBlock Margin="0,12,0,0"
+                           Text="{Binding Reason}"
+                           Style="{StaticResource PageSubtitleStyle}" />
+                <TextBlock Margin="0,8,0,0"
+                           Text="{Binding Detail}"
+                           Style="{StaticResource BodyTextStyle}" />
+                <TextBlock Margin="0,22,0,0"
+                           Text="Capability boundary"
+                           Style="{StaticResource FieldLabelStyle}" />
+                <TextBlock Margin="0,4,0,0"
+                           Text="{Binding Capability}"
+                           Style="{StaticResource BodyTextStyle}" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>
