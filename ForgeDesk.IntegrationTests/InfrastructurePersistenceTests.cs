@@ -22,6 +22,8 @@ public sealed class InfrastructurePersistenceTests
         await scope.ServiceProvider.GetRequiredService<DatabaseInitializer>().InitializeAsync();
         Assert.NotNull(scope.ServiceProvider.GetRequiredService<IProjectOnboardingService>());
         Assert.NotNull(scope.ServiceProvider.GetRequiredService<IThemeSettingsService>());
+        Assert.NotNull(scope.ServiceProvider.GetRequiredService<IAnalysisService>());
+        Assert.NotNull(scope.ServiceProvider.GetRequiredService<IAnalysisEngine>());
         Assert.True(File.Exists(databasePath));
     }
 

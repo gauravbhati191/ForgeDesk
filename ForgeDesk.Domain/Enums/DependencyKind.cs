@@ -1,6 +1,6 @@
 namespace ForgeDesk.Domain;
 
-/// <summary>Reserved relationship categories for Phase 2 dependency extraction.</summary>
+/// <summary>Supported semantic relationship categories for analysis dependencies.</summary>
 public enum DependencyKind
 {
     ProjectReference = 0,

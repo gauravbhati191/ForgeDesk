@@ -1,4 +1,5 @@
 using ForgeDesk.Application;
+using ForgeDesk.Analysis;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -33,6 +34,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IProjectOnboardingService, ProjectOnboardingService>();
         services.AddScoped<IScanLifecycleService, ScanLifecycleService>();
         services.AddScoped<IThemeSettingsService, ThemeSettingsService>();
+        services.AddScoped<IAnalysisRepository, AnalysisRepository>();
+        services.AddScoped<ForgeDesk.Application.IAnalysisEngine, RoslynAnalysisEngine>();
+        services.AddScoped<IAnalysisService, AnalysisService>();
         services.AddScoped<DatabaseInitializer>();
         return services;
     }

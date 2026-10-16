@@ -17,7 +17,13 @@ internal sealed class ScanConfiguration : IEntityTypeConfiguration<Scan>
         builder.Property(scan => scan.FilesProcessed).IsRequired();
         builder.Property(scan => scan.CancellationRequested).IsRequired();
         builder.Property(scan => scan.ErrorMessage).HasMaxLength(4000);
+        builder.Property(scan => scan.AnalysisStatus).HasConversion<string>().HasMaxLength(32).IsRequired();
+        builder.Property(scan => scan.AnalysisErrorMessage).HasMaxLength(4000);
+        builder.Property(scan => scan.AnalysisFilesProcessed).IsRequired();
+        builder.Property(scan => scan.AnalysisSymbolCount).IsRequired();
+        builder.Property(scan => scan.AnalysisDependencyCount).IsRequired();
         builder.HasIndex(scan => new { scan.ProjectId, scan.QueuedAtUtc });
+        builder.HasIndex(scan => new { scan.ProjectId, scan.AnalysisStatus });
         builder.HasMany(scan => scan.SourceFiles)
             .WithOne(sourceFile => sourceFile.Scan)
             .HasForeignKey(sourceFile => sourceFile.ScanId)

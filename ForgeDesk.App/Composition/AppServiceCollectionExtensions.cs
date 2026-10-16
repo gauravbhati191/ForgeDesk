@@ -17,6 +17,7 @@ public static class AppServiceCollectionExtensions
         services.AddForgeDeskPresentation();
         services.AddSingleton<IProjectFolderPicker, WindowsFolderPicker>();
         services.AddSingleton<IProjectWorkspaceService, ApplicationProjectWorkspaceService>();
+        services.AddSingleton<IProjectAnalysisService, PersistedProjectAnalysisService>();
         services.AddSingleton<IThemePreferenceStore, ApplicationThemePreferenceStore>();
         services.AddSingleton<IThemeResourceManager>(_ => new WpfThemeResourceManager(application));
         services.AddSingleton<MainWindow>();

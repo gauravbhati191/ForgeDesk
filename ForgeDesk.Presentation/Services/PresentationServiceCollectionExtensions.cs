@@ -10,6 +10,7 @@ public static class PresentationServiceCollectionExtensions
     {
         services.AddSingleton<HomeViewModel>();
         services.AddSingleton<ProjectsViewModel>();
+        services.AddSingleton<AnalysisViewModel>();
         services.AddSingleton<SettingsViewModel>();
         services.AddSingleton<UnavailablePageViewModelFactory>();
         services.AddSingleton<MainWindowViewModel>();

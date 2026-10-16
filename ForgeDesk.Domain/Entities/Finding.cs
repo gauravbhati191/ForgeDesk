@@ -1,6 +1,6 @@
 namespace ForgeDesk.Domain;
 
-/// <summary>Reserved future code-quality finding.</summary>
+/// <summary>One deterministic code-quality finding produced by an analysis rule.</summary>
 public sealed class Finding
 {
     private Finding()

@@ -9,11 +9,11 @@
 [![SQLite](https://img.shields.io/badge/Database-SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://www.sqlite.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-success?style=for-the-badge)](LICENSE)
 
-*Safe onboarding, metadata discovery, persistent scan lifecycle records, and modern fluent UI shell.*
+*Safe onboarding, metadata discovery, persistent scan lifecycle records, deterministic Roslyn analysis, and a modern fluent UI shell.*
 
 ---
 
-[Repository](https://github.com/gauravbhati191/ForgeDesk) • [Architecture](docs/ARCHITECTURE.md) • [Database](docs/DATABASE.md) • [Development](docs/DEVELOPMENT.md) • [Implementation](docs/PHASE1_IMPLEMENTATION.md)
+[Repository](https://github.com/gauravbhati191/ForgeDesk) • [Architecture](docs/ARCHITECTURE.md) • [Database](docs/DATABASE.md) • [Development](docs/DEVELOPMENT.md) • [Phase 1](docs/PHASE1_IMPLEMENTATION.md) • [Phase 2](docs/PHASE2_IMPLEMENTATION.md)
 
 </div>
 
@@ -40,7 +40,7 @@ ForgeDesk/
 ├── ⚙️ ForgeDesk.Application    # Use Cases, Orchestration, Validation, DTOs, Project Workspace Service
 ├── 💎 ForgeDesk.Domain         # Core Entities, Value Objects, Domain Enums, Invariants
 ├── 🗄️ ForgeDesk.Infrastructure # EF Core SQLite, Migrations, Repositories, File System Scanners
-├── 🔬 ForgeDesk.Analysis       # (Phase 2) Roslyn Code Analysis Contracts
+├── 🔬 ForgeDesk.Analysis       # (Phase 2) MSBuild/Roslyn semantic analysis and quality rules
 ├── 🕸️ ForgeDesk.Graph          # (Phase 2) Dependency & Type Graph Contracts
 └── 🧪 ForgeDesk.Tests/         # Deterministic Unit & Integration Test Suites
     ├── ForgeDesk.UnitTests
@@ -74,7 +74,7 @@ From PowerShell or Terminal at the repository root:
 
 ```powershell
 # 1. Restore locked dependencies
-dotnet restore ForgeDesk.sln
+dotnet restore ForgeDesk.sln --locked-mode
 
 # 2. Build the solution
 dotnet build ForgeDesk.sln --configuration Release
@@ -83,23 +83,35 @@ dotnet build ForgeDesk.sln --configuration Release
 dotnet run --project ForgeDesk.App/ForgeDesk.App.csproj --configuration Release
 ```
 
+### 🔎 Phase 2 WPF analysis surface
+
+After onboarding or reopening a project from **Projects**, use **Code Explorer**,
+**Dependencies**, or **Code Health** to run and view the latest analysis
+snapshot. **Start analysis** invokes the application analysis service through
+the App adapter, reports progress, and persists real symbol, dependency, and
+finding rows. Findings display the stored relative source path and line range;
+they do not pretend to navigate to an editor.
+
+Use **Refresh** to reread persisted data, or **Cancel** to stop an in-flight
+analysis. Projects without analysis rows show an explicit empty state, while
+incomplete scans show partial data and persistence failures show an error state.
+
 ---
 
 ## 🧪 Testing
 
-Deterministic test execution against isolated temporary SQLite databases:
+Deterministic test execution against isolated temporary SQLite databases. The
+canonical repository check runs both suites through the locked build:
 
 ```powershell
-# Run Unit Tests
-dotnet test ForgeDesk.UnitTests/ForgeDesk.UnitTests.csproj --configuration Release
+# Run the canonical restore, build, and unit/integration checks
+make test
+
+# Run an individual suite after the locked build
+dotnet test ForgeDesk.UnitTests/ForgeDesk.UnitTests.csproj --configuration Release --no-build --no-restore
 
 # Run Integration Tests
-dotnet test ForgeDesk.IntegrationTests/ForgeDesk.IntegrationTests.csproj --configuration Release
-```
-
-*Or via `make` (if installed):*
-```bash
-make test
+dotnet test ForgeDesk.IntegrationTests/ForgeDesk.IntegrationTests.csproj --configuration Release --no-build --no-restore
 ```
 
 ---
@@ -122,14 +134,21 @@ Database files are cleanly stored in `%LOCALAPPDATA%\ForgeDesk\forgedesk.db`, ke
 
 ## 🗺️ Roadmap & Phase Progression
 
-- [x] **Phase 1: Native Foundation & Onboarding** *(Current)*
+- [x] **Phase 1: Native Foundation & Onboarding**
   - WPF MVVM Shell with Theme Manager (Dark / Light)
   - Resilient SQLite schema and automatic migrations
   - Safe folder discovery, scan lifecycle, and metadata tracking
   - Recent projects history with graceful record management
-- [ ] **Phase 2: Roslyn Code Analysis Engine**
-  - Syntax and symbol diagnostics
-  - Complexity, maintainability, and quality metrics
+- [x] **Phase 2: WPF analysis integration**
+  - Persisted symbol, dependency, and finding counts
+  - Findings list with relative path and line display
+  - Empty, partial, error, progress, and cancellation states
+- [x] **Phase 2: Roslyn Code Analysis Engine**
+  - MSBuildWorkspace loading for `.sln`, `.slnx`, and `.csproj` inputs
+  - Explicit syntax-only fallback when project-aware loading is unavailable
+  - Deterministic symbols, in-scan semantic relationships, and compiler diagnostics
+  - Configurable TODO/FIXME, long-method, excessive-parameter, and empty-catch rules
+  - Persisted running, completed, failed, and cancelled analysis lifecycle states
 - [ ] **Phase 3: Interactive Architecture Graphs**
   - Dependency visualizer and coupling matrices
 - [ ] **Phase 4: Git Integration & Intelligent Reports**

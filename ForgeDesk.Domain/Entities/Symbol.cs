@@ -1,6 +1,6 @@
 namespace ForgeDesk.Domain;
 
-/// <summary>Reserved future symbol result. Phase 1 does not populate symbols.</summary>
+/// <summary>One Roslyn symbol extracted from a source file in an analysis scan.</summary>
 public sealed class Symbol
 {
     private Symbol()

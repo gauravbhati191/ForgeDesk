@@ -14,12 +14,14 @@ public sealed partial class MainWindowViewModel : ObservableObject
     public MainWindowViewModel(
         HomeViewModel home,
         ProjectsViewModel projects,
+        AnalysisViewModel analysis,
         SettingsViewModel settings,
         UnavailablePageViewModelFactory unavailablePageFactory,
         ILogger<MainWindowViewModel> logger)
     {
         Home = home;
         Projects = projects;
+        Analysis = analysis;
         Settings = settings;
         _unavailablePageFactory = unavailablePageFactory;
         _logger = logger;
@@ -47,6 +49,8 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
     public ProjectsViewModel Projects { get; }
 
+    public AnalysisViewModel Analysis { get; }
+
     public SettingsViewModel Settings { get; }
 
     public IReadOnlyList<NavigationItem> NavigationItems { get; }
@@ -59,6 +63,9 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
     [ObservableProperty]
     private string? _currentProjectPath;
+
+    [ObservableProperty]
+    private Guid? _currentProjectId;
 
     [ObservableProperty]
     private bool _isBusy;
@@ -75,8 +82,11 @@ public sealed partial class MainWindowViewModel : ObservableObject
     {
         NavigationPage.Home => "A clear starting point for your workspace.",
         NavigationPage.Projects => "Choose, reopen, and organize local project folders.",
+        NavigationPage.CodeExplorer => "Review persisted symbols and source locations for the selected project.",
+        NavigationPage.Dependencies => "Review persisted dependency relationships for the selected project.",
+        NavigationPage.CodeHealth => "Review persisted code-health findings for the selected project.",
         NavigationPage.Settings => "Adjust the shell to fit your workspace.",
-        _ => "Phase 1 capability surface."
+        _ => "Phase 2 capability surface."
     };
 
     public string ProjectContextLabel => string.IsNullOrWhiteSpace(CurrentProjectPath)
@@ -108,16 +118,10 @@ public sealed partial class MainWindowViewModel : ObservableObject
         {
             NavigationPage.Home => Home,
             NavigationPage.Projects => Projects,
+            NavigationPage.CodeExplorer => Analysis,
+            NavigationPage.Dependencies => Analysis,
+            NavigationPage.CodeHealth => Analysis,
             NavigationPage.Settings => Settings,
-            NavigationPage.CodeExplorer => _unavailablePageFactory.Create(
-                "Code Explorer",
-                "Source browsing"),
-            NavigationPage.Dependencies => _unavailablePageFactory.Create(
-                "Dependencies",
-                "Dependency graph"),
-            NavigationPage.CodeHealth => _unavailablePageFactory.Create(
-                "Code Health",
-                "Health analysis"),
             NavigationPage.GitChanges => _unavailablePageFactory.Create(
                 "Git Changes",
                 "Version-control changes"),
@@ -155,8 +159,18 @@ public sealed partial class MainWindowViewModel : ObservableObject
     private void OnProjectOpened(object? sender, ProjectOpenedEventArgs eventArgs)
     {
         CurrentProjectPath = eventArgs.Project.FolderPath;
+        CurrentProjectId = eventArgs.Project.Project?.Id;
         StatusMessage = $"{eventArgs.Project.DisplayName} is ready.";
         ErrorMessage = null;
+
+        if (eventArgs.Project.Project is { } project)
+        {
+            _ = Analysis.LoadForProjectAsync(project, eventArgs.Project.Scan?.Id);
+        }
+        else
+        {
+            Analysis.ClearSelection();
+        }
     }
 
     private static string GetProjectName(string path)

@@ -17,7 +17,7 @@ public sealed class HomeViewModel
     public string AnalysisCardTitle => "Analysis";
 
     public string AnalysisCardDescription =>
-        "Code Explorer, Dependencies, and Code Health are reserved for Phase 2 analysis services.";
+        "Run analysis and review persisted symbols, dependencies, and code-health findings for the selected project.";
 
     public string DeliveryCardTitle => "Delivery";
 

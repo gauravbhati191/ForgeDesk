@@ -18,8 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- The presentation shell consumes application contracts through this boundary.
-         The current empty repository does not yet contain the referenced project. -->
+    <!-- The presentation shell consumes application contracts through this boundary. -->
     <ProjectReference Include="..\ForgeDesk.Application\ForgeDesk.Application.csproj" />
   </ItemGroup>
 </Project>

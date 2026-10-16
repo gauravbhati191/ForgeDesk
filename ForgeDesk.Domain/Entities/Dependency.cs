@@ -1,6 +1,6 @@
 namespace ForgeDesk.Domain;
 
-/// <summary>Reserved future dependency result. Phase 1 does not populate dependencies.</summary>
+/// <summary>One semantic relationship between symbols in an analysis scan.</summary>
 public sealed class Dependency
 {
     private Dependency()

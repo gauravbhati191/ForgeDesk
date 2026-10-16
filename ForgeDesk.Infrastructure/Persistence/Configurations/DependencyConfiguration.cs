@@ -13,6 +13,7 @@ internal sealed class DependencyConfiguration : IEntityTypeConfiguration<Depende
         builder.Property(dependency => dependency.RelationshipType).HasMaxLength(128).IsRequired();
         builder.Property(dependency => dependency.IsResolved).IsRequired();
         builder.HasIndex(dependency => new { dependency.ScanId, dependency.SourceSymbolId, dependency.TargetSymbolId, dependency.RelationshipType }).IsUnique();
+        builder.HasIndex(dependency => new { dependency.ScanId, dependency.TargetSymbolId });
         builder.HasOne(dependency => dependency.SourceSymbol)
             .WithMany()
             .HasForeignKey(dependency => dependency.SourceSymbolId)

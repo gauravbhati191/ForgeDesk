@@ -1,6 +1,6 @@
 namespace ForgeDesk.Domain;
 
-/// <summary>Reserved symbol categories for Phase 2 extraction.</summary>
+/// <summary>Symbol categories persisted from C# semantic declarations.</summary>
 public enum SymbolKind
 {
     Unknown = 0,

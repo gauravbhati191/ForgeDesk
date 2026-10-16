@@ -47,22 +47,28 @@ A project has many scans. Deleting a project cascades to its scans and all scan-
 | `ErrorMessage` | nullable text | Failure detail, max 4000. |
 | `ToolVersion` | text | Phase 1 tool marker, max 128. |
 | `CancellationRequested` | boolean | Lifecycle audit flag. |
+| `AnalysisStatus` | text enum | NotStarted, Running, Completed, Failed, or Cancelled; independent of discovery `Status`. |
+| `AnalysisStartedAtUtc` / `AnalysisCompletedAtUtc` | nullable UTC timestamp | Semantic-analysis stage timestamps. |
+| `AnalysisErrorMessage` | nullable text | Analysis failure detail, max 4000. |
+| `AnalysisFilesProcessed` | integer | Source files read/bound by the analysis stage. |
+| `AnalysisSymbolCount` / `AnalysisDependencyCount` | integer | Counts from the latest completed analysis result. |
+| `FindingCount` | integer | Count from the latest completed analysis result. |
 
 ### SourceFiles
 
-Each record is metadata only; source contents are never stored. Fields are `Id`, `ScanId`, `RelativePath`, `FileName`, `Extension`, nullable `ContentHash`, `FileSizeBytes`, `LastModifiedAtUtc`, `Language`, `DiscoveryStatus`, plus a normalized physical path used for de-duplication. The `(ScanId, RelativePath)` index is unique and `(ScanId, Extension)` supports counts.
+Each record is metadata only; source contents are never stored. Fields are `Id`, `ScanId`, `RelativePath`, `FileName`, `Extension`, nullable `ContentHash`, `FileSizeBytes`, `LastModifiedAtUtc`, `Language`, `DiscoveryStatus`, plus a normalized physical path used for de-duplication. The `(ScanId, RelativePath)` index is unique and `(ScanId, Extension)` supports counts. The analysis service reads eligible C# files from this metadata; it does not add content columns.
 
 ### Symbols
 
-`Id`, `ScanId`, `SourceFileId`, `SymbolKey`, `Name`, `Kind`, `StartLine`, and `EndLine`. The table and unique `(ScanId, SymbolKey)` index are ready for Phase 2, but Phase 1 never populates it.
+`Id`, `ScanId`, `SourceFileId`, `SymbolKey`, `Name`, `Kind`, `StartLine`, and `EndLine`. Phase 2 replaces these rows after a successful engine run. `SymbolKey` is deterministic and scoped by scan/source-file identity. Unique `(ScanId, SymbolKey)` and lookup `(ScanId, SourceFileId, Kind)` indexes prevent duplicate results and support source-oriented queries.
 
 ### Dependencies
 
-`Id`, `ScanId`, nullable `SourceSymbolId`, nullable `TargetSymbolId`, `RelationshipType`, and `IsResolved`. The nullable symbol FKs use `SET NULL` so future partial/unresolved records do not orphan a scan. Phase 1 never fabricates dependency rows.
+`Id`, `ScanId`, nullable `SourceSymbolId`, nullable `TargetSymbolId`, `RelationshipType`, and `IsResolved`. Phase 2 persists only in-scan semantic relationships: type references, calls, inheritance, and interface implementation. External targets are omitted; unresolved error-type relationships may have a null target and `IsResolved == false`. The nullable symbol FKs use `SET NULL` so partial/unresolved records do not orphan a scan. Unique `(ScanId, SourceSymbolId, TargetSymbolId, RelationshipType)` and lookup `(ScanId, TargetSymbolId)` indexes support replacement and graph queries.
 
 ### Findings
 
-`Id`, `ScanId`, `RuleId`, nullable `SourceFileId`, nullable `SymbolId`, `Severity`, `Message`, nullable `StartLine`/`EndLine`, and `CreatedAtUtc`. Future source/symbol deletes set optional references to null. Phase 1 does not run quality rules.
+`Id`, `ScanId`, `RuleId`, nullable `SourceFileId`, nullable `SymbolId`, `Severity`, `Message`, nullable `StartLine`/`EndLine`, and `CreatedAtUtc`. Phase 2 populates deterministic rule/compiler findings and replaces them with the rest of a scan's result set. Current built-in rule IDs are `FD001` TODO/FIXME, `FD002` long method, `FD003` excessive parameters, and `FD004` empty catch. Future source/symbol deletes set optional references to null.
 
 ### Settings
 
@@ -77,12 +83,17 @@ Each record is metadata only; source contents are never stored. Fields are `Id`,
 - Symbol → Dependency source/target: optional, `SET NULL`.
 - Symbol → Finding: optional, `SET NULL`.
 - Normalized project root and setting key are unique.
+- `(ProjectId, AnalysisStatus)` supports finding scans by analysis stage.
 - Enum properties are stored as stable strings, not integer ordinals.
 - All application timestamps are UTC `DateTimeOffset` values.
 
 ## Migrations
 
-The initial migration is checked in under `ForgeDesk.Infrastructure/Persistence/Migrations/`. The local tool manifest pins `dotnet-ef` 8.0.11.
+The initial migration and the Phase 2 migration are checked in under
+`ForgeDesk.Infrastructure/Persistence/Migrations/`. Migration
+`20261016080000_AddAnalysisState` adds the analysis fields and the
+`(ProjectId, AnalysisStatus)` index. The local tool manifest pins `dotnet-ef`
+8.0.11.
 
 Apply migrations to the configured database:
 

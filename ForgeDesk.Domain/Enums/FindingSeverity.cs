@@ -1,6 +1,6 @@
 namespace ForgeDesk.Domain;
 
-/// <summary>Reserved quality-finding severity.</summary>
+/// <summary>Severity levels for deterministic quality findings.</summary>
 public enum FindingSeverity
 {
     Info = 0,

@@ -1,0 +1,218 @@
+<UserControl x:Class="ForgeDesk.Presentation.Views.AnalysisView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:ForgeDesk.Presentation.Controls">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="32,28,32,36">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="ANALYSIS" Style="{StaticResource PageEyebrowStyle}" />
+                    <TextBlock Margin="0,8,0,0"
+                               Text="Project analysis"
+                               Style="{StaticResource PageTitleStyle}" />
+                    <TextBlock Margin="0,8,0,0"
+                               Text="Run semantic analysis and review the persisted symbols, dependencies, and findings for the selected onboarded project."
+                               Style="{StaticResource PageSubtitleStyle}" />
+                </StackPanel>
+                <Button Grid.Column="1"
+                        Margin="12,0,8,0"
+                        VerticalAlignment="Center"
+                        AutomationProperties.Name="Start semantic analysis"
+                        Command="{Binding StartAnalysisCommand}"
+                        Content="Start analysis"
+                        Visibility="{Binding HasProject, Converter={StaticResource BooleanToVisibilityConverter}}"
+                        Style="{StaticResource PrimaryButtonStyle}" />
+                <Button Grid.Column="2"
+                        Margin="12,0,8,0"
+                        VerticalAlignment="Center"
+                        AutomationProperties.Name="Refresh persisted analysis"
+                        Command="{Binding RefreshAnalysisCommand}"
+                        Content="Refresh"
+                        Style="{StaticResource SecondaryButtonStyle}" />
+                <Button Grid.Column="3"
+                        VerticalAlignment="Center"
+                        AutomationProperties.Name="Cancel analysis"
+                        Command="{Binding CancelAnalysisCommand}"
+                        Content="Cancel"
+                        IsEnabled="{Binding IsBusy}"
+                        Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}"
+                        Style="{StaticResource SecondaryButtonStyle}" />
+            </Grid>
+
+            <Border Margin="0,26,0,0" Style="{StaticResource CardBorderStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <controls:VectorIcon Grid.Column="0"
+                                         Width="28"
+                                         Height="28"
+                                         Margin="0,2,16,0"
+                                         VerticalAlignment="Top"
+                                         IconKey="Icon.Health"
+                                         Foreground="{DynamicResource AccentBrush}" />
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="{Binding SelectedProjectLabel}" Style="{StaticResource CardTitleStyle}" />
+                        <TextBlock Margin="0,5,0,0"
+                                   Text="{Binding StateMessage}"
+                                   Style="{StaticResource BodyTextStyle}" />
+                        <ProgressBar Margin="0,14,0,0"
+                                     Height="5"
+                                     Maximum="100"
+                                     Value="{Binding ProgressPercent}"
+                                     Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                        <TextBlock Margin="0,6,0,0"
+                                   Text="{Binding ProgressMessage}"
+                                   Style="{StaticResource BodyTextStyle}"
+                                   Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                        <TextBlock Margin="0,8,0,0"
+                                   Text="{Binding ErrorMessage}"
+                                   Foreground="{DynamicResource DangerBrush}"
+                                   TextWrapping="Wrap"
+                                   Visibility="{Binding ShowError, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <Border Margin="0,16,0,0"
+                    Padding="18"
+                    Background="{DynamicResource SurfaceAltBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="10"
+                    Visibility="{Binding ShowNoProject, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <TextBlock Text="No project is selected. Open or reopen an onboarded project from Projects to load persisted analysis."
+                           Style="{StaticResource BodyTextStyle}" />
+            </Border>
+
+            <Border Margin="0,16,0,0"
+                    Padding="18"
+                    Background="{DynamicResource SurfaceAltBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="10"
+                    Visibility="{Binding ShowEmpty, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <TextBlock Text="{Binding StateMessage}" Style="{StaticResource BodyTextStyle}" />
+            </Border>
+
+            <Border Margin="0,16,0,0"
+                    Padding="18"
+                    Background="{DynamicResource SurfaceAltBrush}"
+                    BorderBrush="{DynamicResource WarningBrush}"
+                    BorderThickness="1"
+                    CornerRadius="10"
+                    Visibility="{Binding ShowPartial, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel>
+                    <TextBlock Text="Partial persisted data" Style="{StaticResource CardTitleStyle}" />
+                    <TextBlock Margin="0,5,0,0" Text="{Binding StateMessage}" Style="{StaticResource BodyTextStyle}" />
+                    <TextBlock Margin="0,5,0,0" Text="Refresh after the analysis pipeline completes to see the complete result." Style="{StaticResource BodyTextStyle}" />
+                </StackPanel>
+            </Border>
+
+            <Border Margin="0,16,0,0"
+                    Padding="18"
+                    Background="{DynamicResource SurfaceAltBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="10"
+                    Visibility="{Binding ShowCancelled, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <TextBlock Text="{Binding StateMessage}" Style="{StaticResource BodyTextStyle}" />
+            </Border>
+
+            <UniformGrid Margin="0,16,0,0"
+                         Columns="3"
+                         Visibility="{Binding ShowResults, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Border Margin="0,0,8,0" Style="{StaticResource CardBorderStyle}">
+                    <StackPanel>
+                        <TextBlock Text="Symbols" Style="{StaticResource FieldLabelStyle}" />
+                        <TextBlock Margin="0,5,0,0" Text="{Binding SymbolCount}" Style="{StaticResource PageTitleStyle}" />
+                    </StackPanel>
+                </Border>
+                <Border Margin="4,0,4,0" Style="{StaticResource CardBorderStyle}">
+                    <StackPanel>
+                        <TextBlock Text="Dependencies" Style="{StaticResource FieldLabelStyle}" />
+                        <TextBlock Margin="0,5,0,0" Text="{Binding DependencyCount}" Style="{StaticResource PageTitleStyle}" />
+                    </StackPanel>
+                </Border>
+                <Border Margin="8,0,0,0" Style="{StaticResource CardBorderStyle}">
+                    <StackPanel>
+                        <TextBlock Text="Findings" Style="{StaticResource FieldLabelStyle}" />
+                        <TextBlock Margin="0,5,0,0" Text="{Binding FindingCount}" Style="{StaticResource PageTitleStyle}" />
+                    </StackPanel>
+                </Border>
+            </UniformGrid>
+
+            <Border Margin="0,16,0,0"
+                    Padding="18"
+                    Style="{StaticResource CardBorderStyle}"
+                    Visibility="{Binding ShowResults, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Findings" Style="{StaticResource CardTitleStyle}" />
+                            <TextBlock Margin="0,5,0,0" Text="{Binding ResultsSummary}" Style="{StaticResource BodyTextStyle}" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" HorizontalAlignment="Right">
+                            <TextBlock Text="Status" Style="{StaticResource FieldLabelStyle}" />
+                            <TextBlock Margin="0,3,0,0" Text="{Binding ScanStatusLabel}" Style="{StaticResource BodyTextStyle}" />
+                            <TextBlock Margin="0,3,0,0" Text="{Binding FilesSummary}" Style="{StaticResource BodyTextStyle}" />
+                        </StackPanel>
+                    </Grid>
+
+                    <TextBlock Margin="0,18,0,0"
+                               Text="No findings were persisted for this scan."
+                               Style="{StaticResource BodyTextStyle}"
+                               Visibility="{Binding ShowFindingsEmpty, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+                    <ItemsControl Margin="0,12,0,0"
+                                  ItemsSource="{Binding Findings}"
+                                  Visibility="{Binding HasFindings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Margin="0,6,0,0"
+                                        Padding="12"
+                                        Background="{DynamicResource SurfaceAltBrush}"
+                                        BorderBrush="{DynamicResource BorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="8">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0">
+                                            <TextBlock Text="{Binding SummaryLabel}" Style="{StaticResource CardTitleStyle}" />
+                                            <TextBlock Margin="0,4,0,0"
+                                                       Text="{Binding Message}"
+                                                       Style="{StaticResource BodyTextStyle}" />
+                                        </StackPanel>
+                                        <TextBlock Grid.Column="1"
+                                                   Margin="16,0,0,0"
+                                                   MaxWidth="280"
+                                                   VerticalAlignment="Top"
+                                                   Text="{Binding LocationLabel}"
+                                                   Foreground="{DynamicResource SubtleTextBrush}"
+                                                   FontSize="11"
+                                                   TextWrapping="Wrap"
+                                                   TextAlignment="Right" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

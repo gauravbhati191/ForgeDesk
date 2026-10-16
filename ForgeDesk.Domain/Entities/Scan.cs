@@ -1,11 +1,12 @@
 namespace ForgeDesk.Domain;
 
-/// <summary>A metadata discovery run for a registered project.</summary>
+/// <summary>A metadata discovery run and its optional semantic-analysis stage for a registered project.</summary>
 public sealed class Scan
 {
     private Scan()
     {
         ToolVersion = string.Empty;
+        AnalysisStatus = ForgeDesk.Domain.AnalysisStatus.NotStarted;
     }
 
     private Scan(Guid id, Guid projectId, string toolVersion, DateTimeOffset queuedAtUtc)
@@ -20,6 +21,7 @@ public sealed class Scan
         ToolVersion = ValidateToolVersion(toolVersion);
         QueuedAtUtc = queuedAtUtc;
         Status = ScanStatus.Pending;
+        AnalysisStatus = ForgeDesk.Domain.AnalysisStatus.NotStarted;
     }
 
     public static Scan CreatePending(Guid projectId, string toolVersion, DateTimeOffset? queuedAtUtc = null)
@@ -40,12 +42,22 @@ public sealed class Scan
     public DateTimeOffset QueuedAtUtc { get; private set; }
     public bool CancellationRequested { get; private set; }
 
+    /// <summary>Analysis status is separate from discovery status so Phase 1 scans retain their original meaning.</summary>
+    public AnalysisStatus AnalysisStatus { get; private set; }
+    public DateTimeOffset? AnalysisStartedAtUtc { get; private set; }
+    public DateTimeOffset? AnalysisCompletedAtUtc { get; private set; }
+    public string? AnalysisErrorMessage { get; private set; }
+    public int AnalysisFilesProcessed { get; private set; }
+    public int AnalysisSymbolCount { get; private set; }
+    public int AnalysisDependencyCount { get; private set; }
+
     // Compatibility aliases for earlier lifecycle callers.
     public DateTimeOffset QueuedAt => QueuedAtUtc;
     public DateTimeOffset? StartedAt => StartedAtUtc;
     public DateTimeOffset? CompletedAt => CompletedAtUtc;
     public int SourceFileCount => FilesDiscovered;
     public int FindingCount { get; private set; }
+    public int AnalysisFindingCount => FindingCount;
 
     public Project? Project { get; private set; }
     public ICollection<SourceFile> SourceFiles { get; private set; } = new List<SourceFile>();
@@ -135,7 +147,93 @@ public sealed class Scan
         ErrorMessage = null;
     }
 
+    /// <summary>Starts or restarts semantic analysis without changing discovery status.</summary>
+    public void StartAnalysis(DateTimeOffset? startedAtUtc = null)
+    {
+        if (Status != ScanStatus.Completed)
+        {
+            throw new DomainInvariantException("Only a completed discovery scan can be analyzed.");
+        }
+
+        if (AnalysisStatus == ForgeDesk.Domain.AnalysisStatus.Running)
+        {
+            throw new DomainInvariantException("Analysis is already running for this scan.");
+        }
+
+        AnalysisStatus = ForgeDesk.Domain.AnalysisStatus.Running;
+        AnalysisStartedAtUtc = startedAtUtc ?? DateTimeOffset.UtcNow;
+        AnalysisCompletedAtUtc = null;
+        AnalysisErrorMessage = null;
+        AnalysisFilesProcessed = 0;
+        AnalysisSymbolCount = 0;
+        AnalysisDependencyCount = 0;
+        FindingCount = 0;
+    }
+
+    public void RecordAnalysisProgress(int filesProcessed)
+    {
+        EnsureAnalysisRunning();
+        if (filesProcessed < 0 || filesProcessed > FilesDiscovered)
+        {
+            throw new DomainInvariantException("Analyzed files must be between zero and discovered files.");
+        }
+
+        AnalysisFilesProcessed = filesProcessed;
+    }
+
+    public void CompleteAnalysis(
+        int filesProcessed,
+        int symbolCount,
+        int dependencyCount,
+        int findingCount,
+        DateTimeOffset? completedAtUtc = null)
+    {
+        EnsureAnalysisRunning();
+        if (filesProcessed < 0 || filesProcessed > FilesDiscovered
+            || symbolCount < 0 || dependencyCount < 0 || findingCount < 0)
+        {
+            throw new DomainInvariantException("Analysis counts cannot be negative, and analyzed files cannot exceed discovered files.");
+        }
+
+        AnalysisFilesProcessed = filesProcessed;
+        AnalysisSymbolCount = symbolCount;
+        AnalysisDependencyCount = dependencyCount;
+        FindingCount = findingCount;
+        AnalysisStatus = ForgeDesk.Domain.AnalysisStatus.Completed;
+        AnalysisCompletedAtUtc = completedAtUtc ?? DateTimeOffset.UtcNow;
+        AnalysisErrorMessage = null;
+    }
+
+    public void FailAnalysis(string errorMessage, DateTimeOffset? completedAtUtc = null)
+    {
+        EnsureAnalysisRunning();
+        if (string.IsNullOrWhiteSpace(errorMessage))
+        {
+            throw new DomainInvariantException("An analysis failure must include an error message.");
+        }
+
+        AnalysisStatus = ForgeDesk.Domain.AnalysisStatus.Failed;
+        AnalysisCompletedAtUtc = completedAtUtc ?? DateTimeOffset.UtcNow;
+        AnalysisErrorMessage = errorMessage.Trim();
+    }
+
+    public void CancelAnalysis(DateTimeOffset? completedAtUtc = null)
+    {
+        EnsureAnalysisRunning();
+        AnalysisStatus = ForgeDesk.Domain.AnalysisStatus.Cancelled;
+        AnalysisCompletedAtUtc = completedAtUtc ?? DateTimeOffset.UtcNow;
+        AnalysisErrorMessage = null;
+    }
+
     private void EnsureRunning() => EnsureStatus(ScanStatus.Running, "Only a running scan can record progress.");
+
+    private void EnsureAnalysisRunning()
+    {
+        if (AnalysisStatus != ForgeDesk.Domain.AnalysisStatus.Running)
+        {
+            throw new DomainInvariantException("Only running analysis can record progress.");
+        }
+    }
 
     private void EnsureStatus(ScanStatus expected, string message)
     {

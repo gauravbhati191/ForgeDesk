@@ -14,5 +14,6 @@ internal sealed class SymbolConfiguration : IEntityTypeConfiguration<Symbol>
         builder.Property(symbol => symbol.Name).HasMaxLength(512).IsRequired();
         builder.Property(symbol => symbol.Kind).HasConversion<string>().HasMaxLength(32).IsRequired();
         builder.HasIndex(symbol => new { symbol.ScanId, symbol.SymbolKey }).IsUnique();
+        builder.HasIndex(symbol => new { symbol.ScanId, symbol.SourceFileId, symbol.Kind });
     }
 }

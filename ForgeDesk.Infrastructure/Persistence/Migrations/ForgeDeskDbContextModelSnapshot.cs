@@ -46,6 +46,8 @@ namespace ForgeDesk.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("TargetSymbolId");
 
+                    b.HasIndex("ScanId", "TargetSymbolId");
+
                     b.HasIndex("ScanId", "SourceSymbolId", "TargetSymbolId", "RelationshipType")
                         .IsUnique();
 
@@ -174,6 +176,30 @@ namespace ForgeDesk.Infrastructure.Persistence.Migrations
                     b.Property<DateTimeOffset?>("CompletedAtUtc")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTimeOffset?>("AnalysisCompletedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTimeOffset?>("AnalysisStartedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("AnalysisErrorMessage")
+                        .HasMaxLength(4000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("AnalysisDependencyCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("AnalysisFilesProcessed")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("AnalysisSymbolCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("AnalysisStatus")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("ErrorMessage")
                         .HasMaxLength(4000)
                         .HasColumnType("TEXT");
@@ -209,6 +235,8 @@ namespace ForgeDesk.Infrastructure.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ProjectId", "QueuedAtUtc");
+
+                    b.HasIndex("ProjectId", "AnalysisStatus");
 
                     b.ToTable("Scans", (string)null);
                 });
@@ -330,6 +358,8 @@ namespace ForgeDesk.Infrastructure.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("SourceFileId");
+
+                    b.HasIndex("ScanId", "SourceFileId", "Kind");
 
                     b.HasIndex("ScanId", "SymbolKey")
                         .IsUnique();

@@ -59,4 +59,28 @@ public sealed class DomainEntityTests
         Assert.Equal(symbol.Id, dependency.SourceSymbolId);
         Assert.False(dependency.IsResolved);
     }
+
+    [Fact]
+    public void Analysis_lifecycle_is_separate_from_discovery_and_supports_retry()
+    {
+        var queued = new DateTimeOffset(2026, 1, 2, 3, 4, 5, TimeSpan.Zero);
+        var scan = Scan.CreatePending(Guid.NewGuid(), "test", queued);
+        scan.Start(queued.AddMinutes(1));
+        scan.Complete(2, 2, queued.AddMinutes(2));
+
+        scan.StartAnalysis(queued.AddMinutes(3));
+        scan.RecordAnalysisProgress(1);
+        scan.CompleteAnalysis(2, 4, 3, 1, queued.AddMinutes(4));
+
+        Assert.Equal(ScanStatus.Completed, scan.Status);
+        Assert.Equal(AnalysisStatus.Completed, scan.AnalysisStatus);
+        Assert.Equal(4, scan.AnalysisSymbolCount);
+        Assert.Equal(3, scan.AnalysisDependencyCount);
+        Assert.Equal(1, scan.FindingCount);
+
+        scan.StartAnalysis(queued.AddMinutes(5));
+        Assert.Equal(AnalysisStatus.Running, scan.AnalysisStatus);
+        Assert.Equal(0, scan.AnalysisSymbolCount);
+        Assert.Throws<DomainInvariantException>(() => Scan.CreatePending(Guid.NewGuid(), "test").StartAnalysis());
+    }
 }

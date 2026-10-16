@@ -88,12 +88,12 @@
                     <StackPanel>
                         <TextBlock FontSize="11"
                                    FontWeight="SemiBold"
-                                   Foreground="{DynamicResource MutedTextBrush}"
-                                   Text="PHASE 1 SHELL" />
+                                    Foreground="{DynamicResource MutedTextBrush}"
+                                    Text="PHASE 2 ANALYSIS" />
                         <TextBlock Margin="0,5,0,0"
                                    FontSize="11"
-                                   Foreground="{DynamicResource SubtleTextBrush}"
-                                   Text="Native WPF workspace surface"
+                                    Foreground="{DynamicResource SubtleTextBrush}"
+                                    Text="Persisted analysis workspace surface"
                                    TextWrapping="Wrap" />
                     </StackPanel>
                 </Border>
@@ -189,8 +189,8 @@
                     <TextBlock Grid.Column="2"
                                VerticalAlignment="Center"
                                FontSize="11"
-                               Foreground="{DynamicResource SubtleTextBrush}"
-                               Text="ForgeDesk Phase 1" />
+                                Foreground="{DynamicResource SubtleTextBrush}"
+                                Text="ForgeDesk Phase 2" />
                 </Grid>
             </Border>
         </Grid>
