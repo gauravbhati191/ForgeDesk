@@ -82,14 +82,28 @@
                                                        Text="{Binding Path}"
                                                        Style="{StaticResource BodyTextStyle}"
                                                        TextTrimming="CharacterEllipsis" />
-                                            <TextBlock Margin="0,4,0,0"
-                                                       Foreground="{DynamicResource SubtleTextBrush}"
-                                                       FontSize="11"
-                                                       Text="{Binding ProjectTypeLabel}" />
+                                            <StackPanel Margin="0,4,0,0" Orientation="Horizontal">
+                                                <TextBlock Foreground="{DynamicResource SubtleTextBrush}"
+                                                           FontSize="11"
+                                                           Text="{Binding ProjectTypeLabel}" />
+                                                <TextBlock Margin="10,0,0,0"
+                                                           Foreground="{DynamicResource AccentBrush}"
+                                                           FontSize="11"
+                                                           FontWeight="SemiBold"
+                                                           Text="{Binding FavoriteLabel}" />
+                                            </StackPanel>
                                             <TextBlock Margin="0,3,0,0"
                                                        Foreground="{DynamicResource SubtleTextBrush}"
                                                        FontSize="11"
                                                        Text="{Binding FileSummary}" />
+                                            <TextBlock Margin="0,3,0,0"
+                                                       Foreground="{DynamicResource SubtleTextBrush}"
+                                                       FontSize="11"
+                                                       Text="{Binding LastOpenedLabel}" />
+                                            <TextBlock Margin="0,3,0,0"
+                                                       Foreground="{DynamicResource SubtleTextBrush}"
+                                                       FontSize="11"
+                                                       Text="{Binding ScanStatusLabel}" />
                                             <TextBlock Margin="0,3,0,0"
                                                        Foreground="{DynamicResource SubtleTextBrush}"
                                                        FontSize="11"

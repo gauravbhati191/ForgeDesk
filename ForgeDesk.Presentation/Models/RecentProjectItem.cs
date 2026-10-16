@@ -26,5 +26,9 @@ public sealed record RecentProjectItem(
 
     public string FileSummary => $"{SourceFileCount} C# source files  •  {SupportedProjectFileCount} project files";
 
+    public string LastOpenedLabel => LastOpened is null ? "Not opened yet" : $"Opened {LastOpened.Value:g}";
+
+    public string FavoriteLabel => IsFavorite ? "Favorite" : string.Empty;
+
     public string AvailabilityLabel => IsMissing ? "Folder unavailable" : "Available";
 }

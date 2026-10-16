@@ -17,7 +17,7 @@ public sealed class HomeViewModel
     public string AnalysisCardTitle => "Analysis";
 
     public string AnalysisCardDescription =>
-        "Code Explorer, Dependencies, and Code Health will become available as the core services land.";
+        "Code Explorer, Dependencies, and Code Health are reserved for Phase 2 analysis services.";
 
     public string DeliveryCardTitle => "Delivery";
 
