@@ -47,7 +47,7 @@ public sealed class ProjectOnboardingService : IProjectOnboardingService
         var project = existing ?? new Project(
             Guid.NewGuid(),
             request.Name,
-            validation.NormalizedRootPath!,
+            Path.GetFullPath(request.RootPath.Trim()),
             validation.ProjectType!.Value,
             now,
             request.Description);
