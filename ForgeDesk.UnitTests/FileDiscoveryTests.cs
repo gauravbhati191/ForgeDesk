@@ -26,6 +26,22 @@ public sealed class FileDiscoveryTests
     }
 
     [Fact]
+    public async Task Discovery_keeps_same_file_names_when_the_relative_directories_differ()
+    {
+        using var directory = new TemporaryDirectory();
+        Directory.CreateDirectory(Path.Combine(directory.Path, "one"));
+        Directory.CreateDirectory(Path.Combine(directory.Path, "two"));
+        File.WriteAllText(Path.Combine(directory.Path, "one", "Shared.cs"), "class One {}");
+        File.WriteAllText(Path.Combine(directory.Path, "two", "Shared.cs"), "class Two {}");
+
+        var result = await new FileDiscoveryService().DiscoverAsync(directory.Path);
+
+        Assert.Equal(2, result.Files.Count(file => file.FileName == "Shared.cs"));
+        Assert.Contains(result.Files, file => file.RelativePath == Path.Combine("one", "Shared.cs"));
+        Assert.Contains(result.Files, file => file.RelativePath == Path.Combine("two", "Shared.cs"));
+    }
+
+    [Fact]
     public async Task Discovery_can_filter_extensions_and_compute_small_file_hashes()
     {
         using var directory = new TemporaryDirectory();

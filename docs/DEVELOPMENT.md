@@ -32,7 +32,7 @@ The canonical check is:
 make test
 ```
 
-It runs restore, a Release solution build, 12 unit tests, and 3 integration tests. The tests are local-only and use temporary folders/databases. Useful focused commands are:
+It runs restore, a Release solution build, 13 unit tests, and 4 integration tests. The tests are local-only and use temporary folders/databases. Useful focused commands are:
 
 ```bash
 make test-unit

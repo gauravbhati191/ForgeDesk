@@ -2,11 +2,29 @@ using ForgeDesk.Application;
 using ForgeDesk.Domain;
 using ForgeDesk.Infrastructure;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ForgeDesk.IntegrationTests;
 
 public sealed class InfrastructurePersistenceTests
 {
+    [Fact]
+    public async Task Dependency_injection_resolves_application_services_and_applies_migrations()
+    {
+        using var directory = new TemporaryDirectory();
+        var databasePath = Path.Combine(directory.Path, "di.db");
+        var services = new Microsoft.Extensions.DependencyInjection.ServiceCollection();
+        services.AddLogging();
+        services.AddForgeDeskInfrastructure(options => options.DatabasePath = databasePath);
+        await using var provider = services.BuildServiceProvider();
+        await using var scope = provider.CreateAsyncScope();
+
+        await scope.ServiceProvider.GetRequiredService<DatabaseInitializer>().InitializeAsync();
+        Assert.NotNull(scope.ServiceProvider.GetRequiredService<IProjectOnboardingService>());
+        Assert.NotNull(scope.ServiceProvider.GetRequiredService<IThemeSettingsService>());
+        Assert.True(File.Exists(databasePath));
+    }
+
     [Fact]
     public async Task SQLite_migrations_persist_projects_discovery_and_reopen_without_duplicates()
     {

@@ -59,8 +59,8 @@ The checked-in local SDK was used because the starting environment had no `dotne
 
 - `./.dotnet/dotnet restore ForgeDesk.sln --force-evaluate` — completed and regenerated the locked package assets.
 - `./.dotnet/dotnet build ForgeDesk.sln --configuration Release --no-restore` — passes after final fixes.
-- `./.dotnet/dotnet test ForgeDesk.UnitTests/ForgeDesk.UnitTests.csproj --configuration Release --no-build --no-restore` — 12 tests passed.
-- `./.dotnet/dotnet test ForgeDesk.IntegrationTests/ForgeDesk.IntegrationTests.csproj --configuration Release --no-build --no-restore` — 3 tests passed.
+- `./.dotnet/dotnet test ForgeDesk.UnitTests/ForgeDesk.UnitTests.csproj --configuration Release --no-build --no-restore` — 13 tests passed.
+- `./.dotnet/dotnet test ForgeDesk.IntegrationTests/ForgeDesk.IntegrationTests.csproj --configuration Release --no-build --no-restore` — 4 tests passed.
 - `dotnet ef migrations add InitialCreate` was run with the local `dotnet-ef` 8.0.11 tool; the clean SQLite migration was applied by integration tests.
 
 A Windows GUI launch was not possible in this Linux container. The WPF project did compile with Windows targeting enabled. Native window launch, Windows folder picker behavior, DPI rendering, and visual theme verification remain Windows-only checks.
