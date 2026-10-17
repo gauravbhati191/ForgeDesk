@@ -56,13 +56,13 @@ public sealed class AnalysisPersistenceTests
             .Where(item => item.ScanId == onboarded.Scan.Id)
             .Select(item => item.RelationshipType)
             .ToListAsync();
-        Assert.True(relationships.Any(item => item is "Inherits" or "Implements" or "Calls"));
+        Assert.Contains(relationships, item => item is "Inherits" or "Implements" or "Calls");
         var findingRuleIds = await harness.Context.Findings
             .Where(item => item.ScanId == onboarded.Scan.Id)
             .Select(item => item.RuleId)
             .ToListAsync();
-        Assert.True(findingRuleIds.Contains("FD001"));
-        Assert.True(progress.Any(item => item.Phase == "Completed"));
+        Assert.Contains("FD001", findingRuleIds);
+        Assert.Contains(progress, item => item.Phase == "Completed");
 
         var firstCounts = (
             Symbols: await harness.Context.Symbols.CountAsync(item => item.ScanId == onboarded.Scan.Id),
