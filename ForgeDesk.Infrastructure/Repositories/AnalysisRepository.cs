@@ -1,6 +1,7 @@
 using ForgeDesk.Application;
 using ForgeDesk.Domain;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace ForgeDesk.Infrastructure;
 
@@ -44,22 +45,7 @@ public sealed class AnalysisRepository : IAnalysisRepository
     public async Task ClearResultsAsync(Guid scanId, CancellationToken cancellationToken = default)
     {
         await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
-        var oldDependencies = await _dbContext.Dependencies
-            .Where(item => item.ScanId == scanId)
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
-        var oldFindings = await _dbContext.Findings
-            .Where(item => item.ScanId == scanId)
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
-        var oldSymbols = await _dbContext.Symbols
-            .Where(item => item.ScanId == scanId)
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
-
-        _dbContext.Dependencies.RemoveRange(oldDependencies);
-        _dbContext.Findings.RemoveRange(oldFindings);
-        _dbContext.Symbols.RemoveRange(oldSymbols);
+        await DeleteResultsAsync(scanId, cancellationToken).ConfigureAwait(false);
         await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
     }
@@ -76,33 +62,67 @@ public sealed class AnalysisRepository : IAnalysisRepository
         ArgumentNullException.ThrowIfNull(findings);
 
         await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            // Delete in dependency order. Replacing by scan identity makes rerunning a scan safe
+            // even though entity IDs are generated for the current result set.
+            await DeleteResultsAsync(scanId, cancellationToken).ConfigureAwait(false);
+            await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        // Delete in dependency order. Replacing by scan identity makes rerunning a scan safe
-        // even though entity IDs are generated for the current result set.
-        var oldDependencies = await _dbContext.Dependencies
+            await _dbContext.Symbols.AddRangeAsync(symbols, cancellationToken).ConfigureAwait(false);
+            await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            await _dbContext.Dependencies.AddRangeAsync(dependencies, cancellationToken).ConfigureAwait(false);
+            await _dbContext.Findings.AddRangeAsync(findings, cancellationToken).ConfigureAwait(false);
+            await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+            await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
+        }
+        catch
+        {
+            // Rollback restores database rows, while detaching result entries leaves this context
+            // usable after a failed or cancelled replacement instead of retaining pending rows.
+            DetachTrackedResults(scanId);
+            throw;
+        }
+    }
+
+    private async Task DeleteResultsAsync(Guid scanId, CancellationToken cancellationToken)
+    {
+        // ExecuteDeleteAsync bypasses EF's change tracker. Detach any tracked rows first so
+        // a later SaveChangesAsync cannot try to update or delete rows removed by the bulk SQL.
+        DetachTrackedResults(scanId);
+
+        // Dependencies and findings reference symbols with nullable SetNull foreign keys. Keep
+        // the established order so this also works with providers enforcing the relationships.
+        await _dbContext.Dependencies
             .Where(item => item.ScanId == scanId)
-            .ToListAsync(cancellationToken)
+            .ExecuteDeleteAsync(cancellationToken)
             .ConfigureAwait(false);
-        var oldFindings = await _dbContext.Findings
+        await _dbContext.Findings
             .Where(item => item.ScanId == scanId)
-            .ToListAsync(cancellationToken)
+            .ExecuteDeleteAsync(cancellationToken)
             .ConfigureAwait(false);
-        var oldSymbols = await _dbContext.Symbols
+        await _dbContext.Symbols
             .Where(item => item.ScanId == scanId)
-            .ToListAsync(cancellationToken)
+            .ExecuteDeleteAsync(cancellationToken)
             .ConfigureAwait(false);
+    }
 
-        _dbContext.Dependencies.RemoveRange(oldDependencies);
-        _dbContext.Findings.RemoveRange(oldFindings);
-        _dbContext.Symbols.RemoveRange(oldSymbols);
-        await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+    private void DetachTrackedResults(Guid scanId)
+    {
+        DetachTracked(_dbContext.ChangeTracker.Entries<Dependency>(), item => item.ScanId == scanId);
+        DetachTracked(_dbContext.ChangeTracker.Entries<Finding>(), item => item.ScanId == scanId);
+        DetachTracked(_dbContext.ChangeTracker.Entries<Symbol>(), item => item.ScanId == scanId);
+    }
 
-        await _dbContext.Symbols.AddRangeAsync(symbols, cancellationToken).ConfigureAwait(false);
-        await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        await _dbContext.Dependencies.AddRangeAsync(dependencies, cancellationToken).ConfigureAwait(false);
-        await _dbContext.Findings.AddRangeAsync(findings, cancellationToken).ConfigureAwait(false);
-        await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-        await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
+    private static void DetachTracked<TEntity>(
+        IEnumerable<EntityEntry<TEntity>> entries,
+        Func<TEntity, bool> belongsToScan)
+        where TEntity : class
+    {
+        foreach (var entry in entries.Where(entry => belongsToScan(entry.Entity)).ToArray())
+        {
+            entry.State = EntityState.Detached;
+        }
     }
 }
