@@ -5,9 +5,11 @@ endif
 
 SOLUTION := ForgeDesk.sln
 CONFIGURATION ?= Release
+PUBLISH_DIRECTORY := artifacts/publish/win-x64
+PACKAGE_ARCHIVE := artifacts/ForgeDesk-win-x64.zip
 FRESH_DATABASE := $(CURDIR)/artifacts/forgedesk-fresh.db
 
-.PHONY: restore build test test-unit test-integration migrate-fresh publish clean
+.PHONY: restore build test test-unit test-integration migrate-fresh publish package-release clean
 
 restore:
 	DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 $(DOTNET) restore $(SOLUTION) --locked-mode
@@ -33,7 +35,14 @@ migrate-fresh: build
 	FORGEDESK_DATABASE_PATH="$(FRESH_DATABASE)" DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 $(DOTNET) tool run dotnet-ef database update --project ForgeDesk.Infrastructure/ForgeDesk.Infrastructure.csproj --startup-project ForgeDesk.Infrastructure/ForgeDesk.Infrastructure.csproj
 
 publish: build
-	DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 $(DOTNET) publish ForgeDesk.App/ForgeDesk.App.csproj --configuration $(CONFIGURATION) --runtime win-x64 --self-contained false --output artifacts/publish/win-x64 --no-restore
+	rm -rf "$(PUBLISH_DIRECTORY)"
+	DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 $(DOTNET) publish ForgeDesk.App/ForgeDesk.App.csproj --configuration $(CONFIGURATION) --runtime win-x64 --self-contained true --output "$(PUBLISH_DIRECTORY)" --no-restore -p:PublishSingleFile=false -p:PublishTrimmed=false -p:PublishAot=false
+
+package-release: override CONFIGURATION := Release
+package-release: publish
+	rm -f "$(PACKAGE_ARCHIVE)"
+	(cd "$(PUBLISH_DIRECTORY)" && zip -qr "../../ForgeDesk-win-x64.zip" .)
+	test -s "$(PACKAGE_ARCHIVE)"
 
 clean:
 	DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 $(DOTNET) clean $(SOLUTION) --configuration $(CONFIGURATION)

@@ -142,17 +142,25 @@ dotnet test ForgeDesk.IntegrationTests/ForgeDesk.IntegrationTests.csproj --confi
 
 ## 📦 Windows Deployment / Publishing
 
-Create an optimized, self-contained or framework-dependent Windows release package:
+From the repository root, create the repeatable Release `win-x64` package in PowerShell:
 
 ```powershell
-dotnet publish ForgeDesk.App/ForgeDesk.App.csproj `
-  --configuration Release `
-  --runtime win-x64 `
-  --self-contained false `
-  --output artifacts/publish/win-x64
+Set-ExecutionPolicy -Scope Process Bypass
+.\scripts\package-release.ps1
 ```
 
-Database files are cleanly stored in `%LOCALAPPDATA%\ForgeDesk\forgedesk.db`, keeping binaries isolated from application state.
+The script restores with `--locked-mode`, publishes a self-contained multi-file build,
+and explicitly disables single-file publishing, trimming, and Native AOT. It removes
+stale packaging output, validates the executable/runtime/native SQLite files, rejects
+databases, logs, secrets, and signing files, and creates:
+
+- `artifacts/publish/win-x64/` — the unpacked publish directory
+- `artifacts/ForgeDesk-win-x64.zip` — the distributable ZIP
+
+`make package-release` performs the same Release `win-x64` publish and ZIP assembly on
+systems with `dotnet` and `zip` available. Install or extract the package wherever
+appropriate; ForgeDesk keeps its database and logs outside that directory under
+`%LOCALAPPDATA%\ForgeDesk`.
 
 ---
 
