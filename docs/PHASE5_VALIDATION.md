@@ -25,6 +25,7 @@ Environment for Linux checks: Debian container, project-local .NET SDK `8.0.416`
 | `dotnet list ForgeDesk.sln package --vulnerable --include-transitive` | All nine projects reported no vulnerable packages at the final audit |
 | `git diff --check` | Passed for the implementation changes |
 | `make package-release` | Passed; self-contained `win-x64` publish and ZIP were generated and checked |
+| `docker build -t forgedesk-phase5 .` | Not run; Docker is not installed in the current verification environment |
 
 The package workflow verified the presence of `ForgeDesk.App.exe`, dependency/runtime metadata, and `e_sqlite3.dll`, and rejected database, log, environment, secret, and signing files from the publish/archive contents. Artifacts are intentionally ignored and are not committed.
 
