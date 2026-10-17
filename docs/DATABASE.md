@@ -10,7 +10,7 @@ The desktop composition uses `DatabasePathProvider`. By default the database is:
 
 The directory is created before EF migrations run. Tests pass a temporary SQLite path or use an in-memory temporary directory. Do not put the database in Program Files, beside source code, or in source control. The application does not require a password because SQLite is a local file; file-system permissions are the privacy boundary.
 
-`DatabaseInitializer.InitializeAsync` calls `Database.MigrateAsync`. `EnsureCreated` is not used as the production schema path. A failed migration is logged and prevents the shell from reporting a false ready state.
+`DatabaseInitializer.InitializeAsync` calls `Database.MigrateAsync`. `EnsureCreated` is not used as the production schema path. When the configured database is an existing file and pending migrations are detected, it first creates a unique SQLite online backup under `backups/` and verifies it with `PRAGMA quick_check`. A failed backup or migration is logged and prevents the shell from reporting a false ready state.
 
 ## Entities
 
@@ -113,6 +113,14 @@ dotnet tool run dotnet-ef migrations add DescriptiveName \
 
 Then rebuild and run the integration tests. Never replace a migration already applied to a user's database; add a new migration instead.
 
-## Backup considerations
+## Backup and restoration
 
-Back up the database while ForgeDesk is closed, or copy the SQLite database together with any `forgedesk.db-wal` and `forgedesk.db-shm` files. A project record contains paths and metadata, not source contents, so restoring a database does not restore a project folder. If a path is unavailable after restore, the recent-project screen marks it stale and lets the user remove only the recent marker.
+`IDatabaseBackupService` and `SqliteDatabaseBackupService` use SQLite's online backup API rather than blindly copying a live database file. Backups are written with unique names, are never overwritten or automatically deleted, and are integrity-checked before being reported as complete. The default directory is:
+
+```text
+%LOCALAPPDATA%\\ForgeDesk\\backups\\
+```
+
+Restore only from a verified backup, keep ForgeDesk writes quiesced, and restart the app afterward. The service rejects restoring from the active database path and verifies the destination after the online backup operation. Tests use temporary databases and never touch a developer's real database.
+
+A project record contains paths and metadata, not source contents, so restoring a database does not restore a project folder. If a path is unavailable after restore, the recent-project screen marks it stale and lets the user remove only the recent marker.

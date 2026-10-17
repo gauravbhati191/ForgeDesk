@@ -11,6 +11,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 COPY global.json .
+COPY Directory.Build.props .
 COPY ForgeDesk.sln .
 COPY Makefile .
 COPY ForgeDesk.Domain/ ForgeDesk.Domain/

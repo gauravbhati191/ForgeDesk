@@ -23,7 +23,7 @@ dotnet tool restore
 dotnet restore ForgeDesk.sln --locked-mode
 ```
 
-No global NuGet packages or global EF tools are required. The repository's local tool manifest keeps the EF CLI version reproducible. Docker users can run `docker build -t forgedesk-phase4 .` instead of installing SDK tooling locally.
+No global NuGet packages or global EF tools are required. The repository's local tool manifest keeps the EF CLI version reproducible. Docker users can run `docker build -t forgedesk-phase5 .` instead of installing SDK tooling locally.
 
 ## Checks
 
@@ -39,6 +39,8 @@ It runs restore, a Release solution build, and both local-only test suites. The 
 make test-unit
 make test-integration
 make build
+make publish
+make package-release
 ```
 
 A clean migration check is:
@@ -48,6 +50,9 @@ make migrate-fresh
 ```
 
 This uses `artifacts/forgedesk-fresh.db`, which is ignored by Git.
+
+The Windows release entry point is `scripts/package-release.ps1`. It performs a locked
+restore, self-contained multi-file `win-x64` publish, output checks, and ZIP validation.
 
 ## Windows run/debug
 
@@ -85,7 +90,7 @@ The projects already set `EnableWindowsTargeting=true`. The Linux SDK can compil
 
 ### Startup reports a database failure
 
-Check that `%LOCALAPPDATA%\\ForgeDesk` is writable and that no other process has an incompatible lock. Read `forgedesk.log`. Do not delete the database blindly; back it up first. A corrupt database can be moved aside and allowed to be recreated from migrations, but its historical records will then need a backup restore.
+Check that `%LOCALAPPDATA%\\ForgeDesk` is writable and that no other process has an incompatible lock. Read `forgedesk.log`. Do not delete the database blindly; preserve the database and inspect the uniquely named migration backup under `%LOCALAPPDATA%\\ForgeDesk\\backups`. A corrupt database can be moved aside and allowed to be recreated from migrations, but its historical records will then need a verified backup restore.
 
 ### A recent path is stale
 

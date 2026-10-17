@@ -13,7 +13,7 @@
 
 ---
 
-[Repository](https://github.com/gauravbhati191/ForgeDesk) • [Architecture](docs/ARCHITECTURE.md) • [Database](docs/DATABASE.md) • [Development](docs/DEVELOPMENT.md) • [Phase 1](docs/PHASE1_IMPLEMENTATION.md) • [Phase 2](docs/PHASE2_IMPLEMENTATION.md) • [Phase 3](docs/PHASE3_IMPLEMENTATION.md) • [Phase 4 implementation](docs/PHASE4_IMPLEMENTATION.md) • [Phase 4 Git core](docs/PHASE4_GIT_CORE.md) • [Phase 4 reports](docs/PHASE4_REPORTS.md)
+[Repository](https://github.com/gauravbhati191/ForgeDesk) • [Architecture](docs/ARCHITECTURE.md) • [Developer guide](docs/DEVELOPER_GUIDE.md) • [Database](docs/DATABASE.md) • [User guide](docs/USER_GUIDE.md) • [Troubleshooting](docs/TROUBLESHOOTING.md) • [Development](docs/DEVELOPMENT.md) • [Security](SECURITY.md) • [Contributing](CONTRIBUTING.md) • [Release](docs/RELEASE.md) • [Phase 5 validation](docs/PHASE5_VALIDATION.md)
 
 </div>
 
@@ -21,13 +21,14 @@
 
 ## 🌟 Overview
 
-**ForgeDesk** is an enterprise-grade desktop workspace crafted for C# and .NET engineers. Built natively with **WPF** and **.NET 8**, it prioritizes speed, local privacy, and clean software architecture.
+**ForgeDesk** is a local-first desktop workspace for C# and .NET engineers. Built natively with **WPF** and **.NET 8**, it prioritizes privacy, deterministic analysis, and clean software architecture. The current application version is **1.0.0**.
 
 - 🔒 **100% Local-First & Private**: Zero mandatory cloud services or telemetry. Your proprietary codebase stays strictly on your machine.
-- 🚀 **Lightning Fast Safe Onboarding**: Validates folder structures, inspects solution/project boundaries (`.sln`, `.slnx`, `.csproj`), and scans source trees without touching disk contents.
+- 🚀 **Safe Onboarding**: Validates folder structures, inspects solution/project boundaries (`.sln`, `.slnx`, `.csproj`), and scans source metadata without storing source contents in the database.
 - 💾 **Local Persistence**: Powered by **Entity Framework Core + SQLite** with automatic migrations and ACID transactions.
 - 🎨 **Adaptive Theme Shell**: Native Windows fluent UI shell with instant Light/Dark mode switching and custom vector icons.
 - 🧩 **Clean Architecture**: Decoupled Domain, Application, Infrastructure, Presentation, and App composition layers with strict dependency inversion.
+- 🛡️ **Recovery and Release Hardening**: Consistent SQLite backups before pending migrations, bounded local logs, locked dependency restore, and a repeatable self-contained Windows ZIP package.
 
 ---
 
@@ -162,6 +163,11 @@ systems with `dotnet` and `zip` available. Install or extract the package wherev
 appropriate; ForgeDesk keeps its database and logs outside that directory under
 `%LOCALAPPDATA%\ForgeDesk`.
 
+The package is a multi-file ZIP, not an installer. Code signing, automatic updates, and
+native Windows UI verification are not configured in this repository; see the
+[Phase 5 validation report](docs/PHASE5_VALIDATION.md) for the exact tested and
+unverified scenarios.
+
 ---
 
 ## 🗺️ Roadmap & Phase Progression
@@ -190,12 +196,22 @@ appropriate; ForgeDesk keeps its database and logs outside that directory under
   - [x] Scan-scoped deterministic JSON, self-contained HTML, and CSV findings exports
   - [x] Read-only comparison of persisted analysis runs with stable finding fingerprints
   - [x] Native WPF Git Changes and Reports pages with export/comparison workflow
+- [x] **Phase 5: Hardening and release candidate**
+  - [x] SQLite online backup/recovery and migration safety checks
+  - [x] Bounded local logging and measured bulk-result deletion improvement
+  - [x] Vulnerability audit, locked dependency updates, and reproducible `win-x64` ZIP packaging
+  - [x] Security, user, developer, troubleshooting, release, and validation documentation
+  - [ ] Native Windows UI/accessibility/package-launch verification (requires Windows)
+  - [ ] Optional local AI assistance (deferred; core application remains independent)
 
 ---
 
 ## 🤝 Contributing & License
 
 Contributions, feedback, and issue submissions are welcome!
+
+Read [CONTRIBUTING.md](CONTRIBUTING.md) before making a change. Security reports
+should follow [SECURITY.md](SECURITY.md) rather than a public issue.
 
 1. Fork the Project
 2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)

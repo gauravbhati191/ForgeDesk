@@ -1,0 +1,13 @@
+<Project>
+  <!--
+    The Roslyn 4.5 packages contain resource folders whose short locale names
+    (for example, "fr" and "pt-br") are flagged by NETSDK1188 when the
+    repository is built with the invariant-globalization Linux verification
+    environment. This is package metadata, not ForgeDesk source, and the
+    warning is not emitted by the normal Windows SDK build. Keep the warning
+    suppression narrow and leave all compiler/analyzer warnings enabled.
+  -->
+  <PropertyGroup Condition="'$(OS)' != 'Windows_NT'">
+    <NoWarn>$(NoWarn);NETSDK1188</NoWarn>
+  </PropertyGroup>
+</Project>

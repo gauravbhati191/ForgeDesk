@@ -83,7 +83,7 @@ Domain entities use UTC timestamps, explicit factory methods, private setters, a
 
 ### ForgeDesk.Infrastructure
 
-`ForgeDeskDbContext` is the single EF Core context. `Persistence/Configurations` centralizes table names, enum conversions, lengths, foreign keys, cascades, nullable future references, and indexes. `ProjectOnboardingStore` uses explicit transactions for the begin and completion phases. `DatabaseInitializer` calls `MigrateAsync`, not `EnsureCreated`.
+`ForgeDeskDbContext` is the single EF Core context. `Persistence/Configurations` centralizes table names, enum conversions, lengths, foreign keys, cascades, nullable future references, and indexes. `ProjectOnboardingStore` uses explicit transactions for the begin and completion phases. `DatabaseInitializer` creates a verified SQLite online backup before pending migrations on an existing file-backed database, then calls `MigrateAsync`, not `EnsureCreated`.
 
 `FileDiscoveryService` enumerates one directory at a time, skips configured generated folders, catches inaccessible directory/file metadata errors, checks reparse-point targets against the selected physical root, de-duplicates logical and physical paths, and checks the cancellation token during traversal. The service reports progress but does not persist contents.
 
@@ -118,7 +118,8 @@ App.OnStartup
   -> Host.StartAsync
   -> DatabaseInitializer.InitializeAsync
        -> ensure LocalApplicationData/ForgeDesk exists
-       -> apply checked-in EF migrations
+        -> backup existing DB when migrations are pending
+        -> apply checked-in EF migrations
   -> load Settings[ui.theme]
   -> apply Dark.xaml or Light.xaml
    -> resolve MainWindow + MainWindowViewModel
