@@ -15,6 +15,8 @@ public sealed partial class MainWindowViewModel : ObservableObject
         HomeViewModel home,
         ProjectsViewModel projects,
         AnalysisViewModel analysis,
+        DependencyGraphViewModel dependencyGraph,
+        IssueExplorerViewModel issueExplorer,
         SettingsViewModel settings,
         UnavailablePageViewModelFactory unavailablePageFactory,
         ILogger<MainWindowViewModel> logger)
@@ -22,6 +24,8 @@ public sealed partial class MainWindowViewModel : ObservableObject
         Home = home;
         Projects = projects;
         Analysis = analysis;
+        DependencyGraph = dependencyGraph;
+        IssueExplorer = issueExplorer;
         Settings = settings;
         _unavailablePageFactory = unavailablePageFactory;
         _logger = logger;
@@ -40,6 +44,8 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
         Projects.PropertyChanged += OnProjectsPropertyChanged;
         Projects.ProjectOpened += OnProjectOpened;
+        DependencyGraph.RelatedFindingsRequested += OnGraphRelatedFindingsRequested;
+        IssueExplorer.NavigateToGraphRequested += OnIssueNavigateToGraphRequested;
 
         CurrentPage = NavigationPage.Home;
         CurrentPageViewModel = Home;
@@ -50,6 +56,10 @@ public sealed partial class MainWindowViewModel : ObservableObject
     public ProjectsViewModel Projects { get; }
 
     public AnalysisViewModel Analysis { get; }
+
+    public DependencyGraphViewModel DependencyGraph { get; }
+
+    public IssueExplorerViewModel IssueExplorer { get; }
 
     public SettingsViewModel Settings { get; }
 
@@ -83,8 +93,8 @@ public sealed partial class MainWindowViewModel : ObservableObject
         NavigationPage.Home => "A clear starting point for your workspace.",
         NavigationPage.Projects => "Choose, reopen, and organize local project folders.",
         NavigationPage.CodeExplorer => "Review persisted symbols and source locations for the selected project.",
-        NavigationPage.Dependencies => "Review persisted dependency relationships for the selected project.",
-        NavigationPage.CodeHealth => "Review persisted code-health findings for the selected project.",
+        NavigationPage.Dependencies => "Explore persisted dependency relationships for the selected project.",
+        NavigationPage.CodeHealth => "Search and navigate persisted code-health findings for the selected project.",
         NavigationPage.Settings => "Adjust the shell to fit your workspace.",
         _ => "Phase 2 capability surface."
     };
@@ -119,8 +129,8 @@ public sealed partial class MainWindowViewModel : ObservableObject
             NavigationPage.Home => Home,
             NavigationPage.Projects => Projects,
             NavigationPage.CodeExplorer => Analysis,
-            NavigationPage.Dependencies => Analysis,
-            NavigationPage.CodeHealth => Analysis,
+            NavigationPage.Dependencies => DependencyGraph,
+            NavigationPage.CodeHealth => IssueExplorer,
             NavigationPage.Settings => Settings,
             NavigationPage.GitChanges => _unavailablePageFactory.Create(
                 "Git Changes",
@@ -172,6 +182,20 @@ public sealed partial class MainWindowViewModel : ObservableObject
             Analysis.ClearSelection();
         }
     }
+
+    private void OnGraphRelatedFindingsRequested(object? sender, EventArgs eventArgs)
+    {
+        if (sender is DependencyGraphViewModel graphViewModel
+            && graphViewModel.SelectedNodeId is Guid symbolId)
+        {
+            IssueExplorer.ShowFindingsForSymbol(symbolId);
+        }
+
+        CurrentPage = NavigationPage.CodeHealth;
+    }
+
+    private void OnIssueNavigateToGraphRequested(object? sender, EventArgs eventArgs)
+        => CurrentPage = NavigationPage.Dependencies;
 
     private static string GetProjectName(string path)
     {

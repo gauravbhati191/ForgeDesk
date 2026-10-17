@@ -20,5 +20,6 @@
     <ProjectReference Include="..\ForgeDesk.Domain\ForgeDesk.Domain.csproj" />
     <ProjectReference Include="..\ForgeDesk.Application\ForgeDesk.Application.csproj" />
     <ProjectReference Include="..\ForgeDesk.Infrastructure\ForgeDesk.Infrastructure.csproj" />
+    <ProjectReference Include="..\ForgeDesk.Graph\ForgeDesk.Graph.csproj" />
   </ItemGroup>
 </Project>

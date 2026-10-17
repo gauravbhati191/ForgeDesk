@@ -10,11 +10,24 @@ public sealed record AnalysisFindingItem(
     string Message,
     string? RelativePath,
     int? StartLine,
-    int? EndLine)
+    int? EndLine,
+    Guid? SourceFileId = null,
+    Guid? SymbolId = null,
+    string? SymbolName = null,
+    string? SymbolKey = null,
+    Guid? ScanId = null)
 {
     public string SeverityLabel => Severity.ToString();
 
     public string SummaryLabel => $"{RuleId}  •  {SeverityLabel}";
+
+    public string SymbolLabel => string.IsNullOrWhiteSpace(SymbolName)
+        ? "No associated symbol"
+        : SymbolName;
+
+    public string AnalysisRunLabel => ScanId is Guid scanId
+        ? $"Scan {scanId:D}"
+        : "Scan unavailable";
 
     /// <summary>
     /// Displays the persisted source-file relative path and line range. The UI does

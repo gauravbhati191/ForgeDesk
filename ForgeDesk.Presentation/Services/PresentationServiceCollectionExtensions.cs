@@ -11,6 +11,10 @@ public static class PresentationServiceCollectionExtensions
         services.AddSingleton<HomeViewModel>();
         services.AddSingleton<ProjectsViewModel>();
         services.AddSingleton<AnalysisViewModel>();
+        services.AddSingleton<SourceViewerViewModel>();
+        services.AddSingleton<SymbolDetailsViewModel>();
+        services.AddSingleton<DependencyGraphViewModel>();
+        services.AddSingleton<IssueExplorerViewModel>();
         services.AddSingleton<SettingsViewModel>();
         services.AddSingleton<UnavailablePageViewModelFactory>();
         services.AddSingleton<MainWindowViewModel>();

@@ -26,11 +26,18 @@
       "forgedesk.application": {
         "type": "Project",
         "dependencies": {
-          "ForgeDesk.Domain": "[1.0.0, )"
+          "ForgeDesk.Domain": "[1.0.0, )",
+          "ForgeDesk.Graph": "[1.0.0, )"
         }
       },
       "forgedesk.domain": {
         "type": "Project"
+      },
+      "forgedesk.graph": {
+        "type": "Project",
+        "dependencies": {
+          "ForgeDesk.Domain": "[1.0.0, )"
+        }
       }
     }
   }

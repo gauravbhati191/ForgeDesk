@@ -1,5 +1,6 @@
 using ForgeDesk.Application;
 using ForgeDesk.Analysis;
+using ForgeDesk.Graph;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -37,6 +38,13 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IAnalysisRepository, AnalysisRepository>();
         services.AddScoped<ForgeDesk.Application.IAnalysisEngine, RoslynAnalysisEngine>();
         services.AddScoped<IAnalysisService, AnalysisService>();
+        services.AddScoped<IGraphQueryRepository, GraphQueryRepository>();
+        services.AddScoped<GraphDataBuilder>();
+        services.AddScoped<IGraphLayoutService, DeterministicGraphLayoutService>();
+        services.AddScoped<IGraphDataProvider, GraphDataProvider>();
+        services.AddScoped<GraphQueryService>();
+        services.AddScoped<IGraphQueryService>(provider => provider.GetRequiredService<GraphQueryService>());
+        services.AddScoped<IGraphService>(provider => provider.GetRequiredService<GraphQueryService>());
         services.AddScoped<DatabaseInitializer>();
         return services;
     }

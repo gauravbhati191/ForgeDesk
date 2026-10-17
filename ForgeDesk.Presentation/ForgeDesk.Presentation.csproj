@@ -20,5 +20,7 @@
   <ItemGroup>
     <!-- The presentation shell consumes application contracts through this boundary. -->
     <ProjectReference Include="..\ForgeDesk.Application\ForgeDesk.Application.csproj" />
+    <!-- Graph UI consumes the public read/query contracts without editing the graph core. -->
+    <ProjectReference Include="..\ForgeDesk.Graph\ForgeDesk.Graph.csproj" />
   </ItemGroup>
 </Project>

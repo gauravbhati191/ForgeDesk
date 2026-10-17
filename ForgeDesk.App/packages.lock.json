@@ -724,11 +724,18 @@
       "forgedesk.application": {
         "type": "Project",
         "dependencies": {
-          "ForgeDesk.Domain": "[1.0.0, )"
+          "ForgeDesk.Domain": "[1.0.0, )",
+          "ForgeDesk.Graph": "[1.0.0, )"
         }
       },
       "forgedesk.domain": {
         "type": "Project"
+      },
+      "forgedesk.graph": {
+        "type": "Project",
+        "dependencies": {
+          "ForgeDesk.Domain": "[1.0.0, )"
+        }
       },
       "forgedesk.infrastructure": {
         "type": "Project",
@@ -736,6 +743,7 @@
           "ForgeDesk.Analysis": "[1.0.0, )",
           "ForgeDesk.Application": "[1.0.0, )",
           "ForgeDesk.Domain": "[1.0.0, )",
+          "ForgeDesk.Graph": "[1.0.0, )",
           "Microsoft.EntityFrameworkCore.Sqlite": "[8.0.11, )",
           "Microsoft.Extensions.DependencyInjection": "[8.0.1, )"
         }
@@ -745,6 +753,7 @@
         "dependencies": {
           "CommunityToolkit.Mvvm": "[8.3.2, )",
           "ForgeDesk.Application": "[1.0.0, )",
+          "ForgeDesk.Graph": "[1.0.0, )",
           "Microsoft.Extensions.DependencyInjection.Abstractions": "[8.0.2, )",
           "Microsoft.Extensions.Logging.Abstractions": "[8.0.2, )"
         }

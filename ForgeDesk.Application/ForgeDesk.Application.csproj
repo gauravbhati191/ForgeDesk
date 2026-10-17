@@ -12,5 +12,6 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\ForgeDesk.Domain\ForgeDesk.Domain.csproj" />
+    <ProjectReference Include="..\ForgeDesk.Graph\ForgeDesk.Graph.csproj" />
   </ItemGroup>
 </Project>

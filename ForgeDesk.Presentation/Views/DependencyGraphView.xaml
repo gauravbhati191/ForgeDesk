@@ -1,0 +1,276 @@
+<UserControl x:Class="ForgeDesk.Presentation.Views.DependencyGraphView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:ForgeDesk.Presentation.Controls"
+             xmlns:views="clr-namespace:ForgeDesk.Presentation.Views">
+    <Grid Margin="28,24,28,28">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0">
+                <TextBlock Text="DEPENDENCIES" Style="{StaticResource PageEyebrowStyle}" />
+                <TextBlock Margin="0,6,0,0" Text="Interactive dependency graph" Style="{StaticResource PageTitleStyle}" />
+                <TextBlock Margin="0,6,0,0"
+                           Text="Explore persisted symbols and supported relationships from the selected analysis scan."
+                           Style="{StaticResource PageSubtitleStyle}" />
+            </StackPanel>
+            <Button Grid.Column="1"
+                    Margin="12,0,8,0"
+                    VerticalAlignment="Center"
+                    AutomationProperties.Name="Refresh dependency graph"
+                    Command="{Binding RefreshCommand}"
+                    Content="Refresh"
+                    Style="{StaticResource SecondaryButtonStyle}" />
+            <Button Grid.Column="2"
+                    Margin="0,0,8,0"
+                    VerticalAlignment="Center"
+                    AutomationProperties.Name="Fit dependency graph"
+                    Command="{Binding FitGraphCommand}"
+                    Content="Fit"
+                    Style="{StaticResource SecondaryButtonStyle}" />
+            <Button Grid.Column="3"
+                    VerticalAlignment="Center"
+                    AutomationProperties.Name="Reset dependency graph view"
+                    Command="{Binding ResetViewCommand}"
+                    Content="Reset"
+                    Style="{StaticResource SecondaryButtonStyle}" />
+        </Grid>
+
+        <Border Grid.Row="1"
+                Margin="0,18,0,14"
+                Padding="12"
+                Background="{DynamicResource SurfaceBrush}"
+                BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="1"
+                CornerRadius="10">
+            <WrapPanel>
+                <TextBox Width="210"
+                         Margin="0,0,8,0"
+                         Padding="8,5"
+                         AutomationProperties.Name="Search symbols"
+                         ToolTip="Search symbol names, identities, and relative source paths"
+                         Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
+                <ComboBox Width="128"
+                          Margin="0,0,8,0"
+                          AutomationProperties.Name="Filter symbol kind"
+                          ItemsSource="{Binding SymbolKindOptions}"
+                          SelectedItem="{Binding SymbolKindFilter, UpdateSourceTrigger=PropertyChanged}" />
+                <ComboBox Width="150"
+                          Margin="0,0,8,0"
+                          AutomationProperties.Name="Filter relationship type"
+                          ItemsSource="{Binding RelationshipOptions}"
+                          SelectedItem="{Binding RelationshipFilter, UpdateSourceTrigger=PropertyChanged}" />
+                <ComboBox Width="105"
+                          Margin="0,0,8,0"
+                          AutomationProperties.Name="Filter dependency direction"
+                          ItemsSource="{Binding DirectionOptions}"
+                          SelectedItem="{Binding Direction, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBox Width="86"
+                         Margin="0,0,8,0"
+                         Padding="8,5"
+                         AutomationProperties.Name="Neighborhood depth"
+                         ToolTip="Zero means unlimited; a positive value bounds the selected node neighborhood"
+                         Text="{Binding NeighborhoodDepth, UpdateSourceTrigger=PropertyChanged}" />
+                <CheckBox Margin="0,6,12,0"
+                          VerticalAlignment="Center"
+                          AutomationProperties.Name="Show isolated symbols"
+                          Content="Show isolated"
+                          IsChecked="{Binding ShowIsolatedNodes}" />
+                <Button Margin="0,0,8,0"
+                        AutomationProperties.Name="Clear graph filters"
+                        Command="{Binding ClearFiltersCommand}"
+                        Content="Clear filters"
+                        Style="{StaticResource SecondaryButtonStyle}" />
+                <TextBlock Margin="4,7,0,0"
+                           VerticalAlignment="Center"
+                           Text="{Binding CountSummary}"
+                           Style="{StaticResource BodyTextStyle}" />
+                <TextBlock Margin="12,7,0,0"
+                           MaxWidth="360"
+                           VerticalAlignment="Center"
+                           Foreground="{DynamicResource WarningBrush}"
+                           Text="{Binding StateMessage}"
+                           TextTrimming="CharacterEllipsis"
+                           Visibility="{Binding ShowPartial, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            </WrapPanel>
+        </Border>
+
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2.2*" />
+                <ColumnDefinition Width="14" />
+                <ColumnDefinition Width="1*" />
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0"
+                    Background="{DynamicResource SurfaceBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="10"
+                    Visibility="{Binding ShowResults, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <controls:DependencyGraphCanvas Projection="{Binding Projection}"
+                                                 SelectedNodeId="{Binding SelectedNodeId, Mode=TwoWay}"
+                                                 SelectedEdgeId="{Binding SelectedEdgeId, Mode=TwoWay}"
+                                                 FitRequest="{Binding FitRequest}"
+                                                 ResetRequest="{Binding ResetRequest}"
+                                                 BackgroundBrush="{DynamicResource SurfaceBrush}"
+                                                 EdgeBrush="{DynamicResource BorderBrush}"
+                                                 LabelBrush="{DynamicResource TextBrush}"
+                                                 NodeBrush="{DynamicResource AccentSoftBrush}"
+                                                 NodeAlternateBrush="{DynamicResource NavigationSelectedBrush}"
+                                                 NodeMemberBrush="{DynamicResource SurfaceAltBrush}"
+                                                 SelectedBrush="{DynamicResource AccentBrush}" />
+            </Border>
+            <Border Grid.Column="0"
+                    Padding="20"
+                    Background="{DynamicResource SurfaceBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="10"
+                    Visibility="{Binding ShowFilteredEmpty, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <TextBlock Text="No symbols match the current graph filters. Clear a filter or select a broader neighborhood." Style="{StaticResource BodyTextStyle}" TextWrapping="Wrap" />
+            </Border>
+
+            <Border Grid.Column="0"
+                    Padding="20"
+                    Background="{DynamicResource SurfaceBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="10"
+                    Visibility="{Binding ShowNoProject, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <TextBlock Text="{Binding StateMessage}" Style="{StaticResource BodyTextStyle}" />
+            </Border>
+            <Border Grid.Column="0"
+                    Padding="20"
+                    Background="{DynamicResource SurfaceBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="10"
+                    Visibility="{Binding ShowLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel>
+                    <TextBlock Text="Loading dependency graph" Style="{StaticResource CardTitleStyle}" />
+                    <TextBlock Margin="0,5,0,0" Text="{Binding StateMessage}" Style="{StaticResource BodyTextStyle}" />
+                </StackPanel>
+            </Border>
+            <Border Grid.Column="0"
+                    Padding="20"
+                    Background="{DynamicResource SurfaceBrush}"
+                    BorderBrush="{DynamicResource WarningBrush}"
+                    BorderThickness="1"
+                    CornerRadius="10"
+                    Visibility="{Binding ShowEmpty, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel>
+                    <TextBlock Text="No graph data" Style="{StaticResource CardTitleStyle}" />
+                    <TextBlock Margin="0,5,0,0" Text="{Binding StateMessage}" Style="{StaticResource BodyTextStyle}" />
+                </StackPanel>
+            </Border>
+            <Border Grid.Column="0"
+                    Padding="20"
+                    Background="{DynamicResource SurfaceBrush}"
+                    BorderBrush="{DynamicResource DangerBrush}"
+                    BorderThickness="1"
+                    CornerRadius="10"
+                    Visibility="{Binding ShowError, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel>
+                    <TextBlock Text="Graph unavailable" Style="{StaticResource CardTitleStyle}" />
+                    <TextBlock Margin="0,5,0,0" Text="{Binding StateMessage}" Style="{StaticResource BodyTextStyle}" />
+                    <TextBlock Margin="0,5,0,0" Text="{Binding ErrorMessage}" Foreground="{DynamicResource DangerBrush}" TextWrapping="Wrap" />
+                    </StackPanel>
+            </Border>
+            <Border Grid.Column="0"
+                    Padding="20"
+                    Background="{DynamicResource SurfaceBrush}"
+                    BorderBrush="{DynamicResource WarningBrush}"
+                    BorderThickness="1"
+                    CornerRadius="10"
+                    Visibility="{Binding ShowCancelled, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <TextBlock Text="{Binding StateMessage}" Style="{StaticResource BodyTextStyle}" />
+            </Border>
+
+            <Border Grid.Column="2"
+                    Padding="16"
+                    Background="{DynamicResource SurfaceBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="10">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel DataContext="{Binding Details}">
+                        <TextBlock Text="SYMBOL DETAILS" Style="{StaticResource PageEyebrowStyle}" />
+                        <TextBlock Margin="0,6,0,0" Text="{Binding SymbolName}" Style="{StaticResource CardTitleStyle}" />
+                        <TextBlock Margin="0,4,0,0" Text="{Binding SymbolKindLabel}" Style="{StaticResource BodyTextStyle}" />
+                        <TextBlock Margin="0,12,0,0" Text="Fully qualified identity" Style="{StaticResource FieldLabelStyle}" />
+                        <TextBlock Margin="0,3,0,0" Text="{Binding FullyQualifiedName}" Style="{StaticResource BodyTextStyle}" TextWrapping="Wrap" />
+                        <TextBlock Margin="0,12,0,0" Text="Containing namespace/type" Style="{StaticResource FieldLabelStyle}" />
+                        <TextBlock Margin="0,3,0,0" Text="{Binding NamespaceLabel}" Style="{StaticResource BodyTextStyle}" TextWrapping="Wrap" />
+                        <TextBlock Margin="0,12,0,0" Text="Source" Style="{StaticResource FieldLabelStyle}" />
+                        <TextBlock Margin="0,3,0,0" Text="{Binding SourcePathLabel}" Style="{StaticResource BodyTextStyle}" TextWrapping="Wrap" />
+                        <UniformGrid Margin="0,16,0,0" Columns="3">
+                            <StackPanel>
+                                <TextBlock Text="Incoming" Style="{StaticResource FieldLabelStyle}" />
+                                <TextBlock Margin="0,3,0,0" Text="{Binding IncomingCount}" Style="{StaticResource CardTitleStyle}" />
+                            </StackPanel>
+                            <StackPanel Margin="8,0,0,0">
+                                <TextBlock Text="Outgoing" Style="{StaticResource FieldLabelStyle}" />
+                                <TextBlock Margin="0,3,0,0" Text="{Binding OutgoingCount}" Style="{StaticResource CardTitleStyle}" />
+                            </StackPanel>
+                            <StackPanel Margin="8,0,0,0">
+                                <TextBlock Text="Findings" Style="{StaticResource FieldLabelStyle}" />
+                                <TextBlock Margin="0,3,0,0" Text="{Binding RelatedFindingCount}" Style="{StaticResource CardTitleStyle}" />
+                            </StackPanel>
+                        </UniformGrid>
+                        <StackPanel Margin="0,16,0,0">
+                            <Button Margin="0,0,0,7"
+                                    AutomationProperties.Name="Open selected symbol source"
+                                    Command="{Binding OpenSourceCommand}"
+                                    Content="Open source preview"
+                                    Style="{StaticResource PrimaryButtonStyle}" />
+                            <Button Margin="0,0,0,7"
+                                    AutomationProperties.Name="Show incoming dependencies"
+                                    Command="{Binding ShowIncomingCommand}"
+                                    Content="Show incoming"
+                                    Style="{StaticResource SecondaryButtonStyle}" />
+                            <Button Margin="0,0,0,7"
+                                    AutomationProperties.Name="Show outgoing dependencies"
+                                    Command="{Binding ShowOutgoingCommand}"
+                                    Content="Show outgoing"
+                                    Style="{StaticResource SecondaryButtonStyle}" />
+                            <Button AutomationProperties.Name="View related findings"
+                                    Command="{Binding ViewRelatedFindingsCommand}"
+                                    Content="View related findings"
+                                    Style="{StaticResource SecondaryButtonStyle}" />
+                        </StackPanel>
+                        <TextBlock Margin="0,18,0,0"
+                                   Text="{Binding StateMessage}"
+                                   Style="{StaticResource BodyTextStyle}"
+                                   TextWrapping="Wrap" />
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+
+        <Grid Grid.Row="3" Margin="0,14,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0"
+                       Text="{Binding SelectedEdgeLabel}"
+                       Style="{StaticResource BodyTextStyle}"
+                       TextTrimming="CharacterEllipsis" />
+            <views:SourceViewerView Grid.Row="1"
+                                    Margin="0,10,0,0"
+                                    DataContext="{Binding SourceViewer}" />
+        </Grid>
+    </Grid>
+</UserControl>

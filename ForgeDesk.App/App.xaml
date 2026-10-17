@@ -23,6 +23,12 @@
             <DataTemplate DataType="{x:Type vm:AnalysisViewModel}">
                 <views:AnalysisView />
             </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:DependencyGraphViewModel}">
+                <views:DependencyGraphView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:IssueExplorerViewModel}">
+                <views:IssueExplorerView />
+            </DataTemplate>
             <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
                 <views:SettingsView />
             </DataTemplate>

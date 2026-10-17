@@ -13,7 +13,7 @@
 
 ---
 
-[Repository](https://github.com/gauravbhati191/ForgeDesk) • [Architecture](docs/ARCHITECTURE.md) • [Database](docs/DATABASE.md) • [Development](docs/DEVELOPMENT.md) • [Phase 1](docs/PHASE1_IMPLEMENTATION.md) • [Phase 2](docs/PHASE2_IMPLEMENTATION.md)
+[Repository](https://github.com/gauravbhati191/ForgeDesk) • [Architecture](docs/ARCHITECTURE.md) • [Database](docs/DATABASE.md) • [Development](docs/DEVELOPMENT.md) • [Phase 1](docs/PHASE1_IMPLEMENTATION.md) • [Phase 2](docs/PHASE2_IMPLEMENTATION.md) • [Phase 3](docs/PHASE3_IMPLEMENTATION.md)
 
 </div>
 
@@ -41,7 +41,7 @@ ForgeDesk/
 ├── 💎 ForgeDesk.Domain         # Core Entities, Value Objects, Domain Enums, Invariants
 ├── 🗄️ ForgeDesk.Infrastructure # EF Core SQLite, Migrations, Repositories, File System Scanners
 ├── 🔬 ForgeDesk.Analysis       # (Phase 2) MSBuild/Roslyn semantic analysis and quality rules
-├── 🕸️ ForgeDesk.Graph          # (Phase 2) Dependency & Type Graph Contracts
+├── 🕸️ ForgeDesk.Graph          # (Phase 3) Persisted graph contracts, filtering, and layout
 └── 🧪 ForgeDesk.Tests/         # Deterministic Unit & Integration Test Suites
     ├── ForgeDesk.UnitTests
     └── ForgeDesk.IntegrationTests
@@ -83,18 +83,24 @@ dotnet build ForgeDesk.sln --configuration Release
 dotnet run --project ForgeDesk.App/ForgeDesk.App.csproj --configuration Release
 ```
 
-### 🔎 Phase 2 WPF analysis surface
+### 🔎 Analysis, graph, and issue workspace
 
 After onboarding or reopening a project from **Projects**, use **Code Explorer**,
 **Dependencies**, or **Code Health** to run and view the latest analysis
 snapshot. **Start analysis** invokes the application analysis service through
 the App adapter, reports progress, and persists real symbol, dependency, and
-finding rows. Findings display the stored relative source path and line range;
-they do not pretend to navigate to an editor.
+finding rows. **Dependencies** renders those persisted symbols and edges in a
+native WPF canvas with search, symbol-kind/relationship/direction/depth and
+isolated-node filters, selection details, pan/zoom, Fit, and Reset. **Code
+Health** provides the persisted issue explorer with severity/rule/file search,
+sorting, source preview, and symbol navigation. Findings and symbols display
+validated relative source paths and line ranges.
 
 Use **Refresh** to reread persisted data, or **Cancel** to stop an in-flight
 analysis. Projects without analysis rows show an explicit empty state, while
 incomplete scans show partial data and persistence failures show an error state.
+See [the Phase 3 implementation notes](docs/PHASE3_IMPLEMENTATION.md) for the
+graph semantics, source validation, and Windows manual verification procedure.
 
 ---
 
@@ -149,8 +155,10 @@ Database files are cleanly stored in `%LOCALAPPDATA%\ForgeDesk\forgedesk.db`, ke
   - Deterministic symbols, in-scan semantic relationships, and compiler diagnostics
   - Configurable TODO/FIXME, long-method, excessive-parameter, and empty-catch rules
   - Persisted running, completed, failed, and cancelled analysis lifecycle states
-- [ ] **Phase 3: Interactive Architecture Graphs**
-  - Dependency visualizer and coupling matrices
+- [x] **Phase 3: Interactive Architecture Graphs, Issues, and Source Preview**
+  - Persisted dependency graph with deterministic layout, pan/zoom, selection, and filters
+  - Symbol details, related finding navigation, and scan-scoped graph states
+  - Finding search/filter/sort and safe read-only source preview with line highlighting
 - [ ] **Phase 4: Git Integration & Intelligent Reports**
 
 ---

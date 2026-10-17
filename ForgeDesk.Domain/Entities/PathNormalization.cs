@@ -29,7 +29,11 @@ public static class PathNormalization
                 && !relative.StartsWith(".." + Path.AltDirectorySeparatorChar, StringComparison.Ordinal));
     }
 
-    /// <summary>Normalizes a relative path and rejects traversal.</summary>
+    /// <summary>
+    /// Normalizes a relative path and rejects traversal. Persisted relative paths use
+    /// forward slashes on every platform so the same scan data has stable values on
+    /// Windows and Unix hosts.
+    /// </summary>
     public static string NormalizeRelative(string path)
     {
         if (string.IsNullOrWhiteSpace(path))
@@ -37,20 +41,24 @@ public static class PathNormalization
             throw new DomainInvariantException("A relative path is required.");
         }
 
-        var normalized = path.Trim().Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
-        if (Path.IsPathRooted(normalized))
+        var normalized = path.Trim().Replace('\\', '/');
+        if (Path.IsPathRooted(normalized) || LooksLikeWindowsRootedPath(normalized))
         {
             throw new DomainInvariantException("A source-file path must be relative.");
         }
 
-        var segments = normalized.Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
+        var segments = normalized.Split('/', StringSplitOptions.RemoveEmptyEntries);
         if (segments.Any(segment => segment is "." or ".."))
         {
             throw new DomainInvariantException("A source-file path cannot contain traversal segments.");
         }
 
-        return string.Join(Path.DirectorySeparatorChar, segments);
+        return string.Join('/', segments);
     }
+
+    private static bool LooksLikeWindowsRootedPath(string path)
+        => path.StartsWith("//", StringComparison.Ordinal)
+            || (path.Length >= 2 && char.IsLetter(path[0]) && path[1] == ':');
 
     internal static StringComparer PathComparer => OperatingSystem.IsWindows()
         ? StringComparer.OrdinalIgnoreCase

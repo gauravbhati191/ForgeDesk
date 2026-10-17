@@ -213,27 +213,83 @@ public sealed class PersistedProjectAnalysisService : IProjectAnalysisService
         CancellationToken cancellationToken)
     {
         progress?.Report(new AnalysisProgress("Counting persisted symbols...", 1, 4));
-        var symbolCount = await dbContext.Symbols
+        var sourceFiles = await dbContext.SourceFiles
             .AsNoTracking()
-            .CountAsync(symbol => symbol.ScanId == scan.Id, cancellationToken)
+            .Where(sourceFile => sourceFile.ScanId == scan.Id)
+            .OrderBy(sourceFile => sourceFile.RelativePath)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        var symbols = await dbContext.Symbols
+            .AsNoTracking()
+            .Include(symbol => symbol.SourceFile)
+            .Where(symbol => symbol.ScanId == scan.Id)
+            .OrderBy(symbol => symbol.SymbolKey)
+            .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
 
         progress?.Report(new AnalysisProgress("Counting persisted dependencies...", 2, 4));
-        var dependencyCount = await dbContext.Dependencies
+        var dependencies = await dbContext.Dependencies
             .AsNoTracking()
-            .CountAsync(dependency => dependency.ScanId == scan.Id, cancellationToken)
+            .Include(dependency => dependency.SourceSymbol)
+            .Include(dependency => dependency.TargetSymbol)
+            .Where(dependency => dependency.ScanId == scan.Id)
+            .OrderBy(dependency => dependency.RelationshipType)
+            .ThenBy(dependency => dependency.SourceSymbolId)
+            .ThenBy(dependency => dependency.TargetSymbolId)
+            .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
 
         progress?.Report(new AnalysisProgress("Loading persisted findings...", 3, 4));
         var findings = await dbContext.Findings
             .AsNoTracking()
             .Include(finding => finding.SourceFile)
+            .Include(finding => finding.Symbol)
             .Where(finding => finding.ScanId == scan.Id)
             .OrderBy(finding => finding.Severity)
             .ThenBy(finding => finding.RuleId)
             .ThenBy(finding => finding.StartLine)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
+
+        var sourceFileItems = sourceFiles
+            .Select(sourceFile => new AnalysisSourceFileItem(
+                sourceFile.Id,
+                sourceFile.ScanId,
+                sourceFile.RelativePath,
+                sourceFile.FileName,
+                sourceFile.Extension,
+                sourceFile.Language,
+                sourceFile.FileSizeBytes,
+                sourceFile.LastModifiedAtUtc))
+            .ToArray();
+
+        var sourceFilesById = sourceFiles.ToDictionary(sourceFile => sourceFile.Id);
+
+        var symbolItems = symbols
+            .Select(symbol => new AnalysisSymbolItem(
+                symbol.Id,
+                symbol.ScanId,
+                symbol.SourceFileId,
+                symbol.SymbolKey,
+                symbol.Name,
+                symbol.Kind,
+                symbol.SourceFile?.RelativePath ?? sourceFilesById.GetValueOrDefault(symbol.SourceFileId)?.RelativePath,
+                symbol.StartLine,
+                symbol.EndLine))
+            .ToArray();
+
+        var dependencyItems = dependencies
+            .Select(dependency => new AnalysisDependencyItem(
+                dependency.Id,
+                dependency.ScanId,
+                dependency.SourceSymbolId,
+                dependency.TargetSymbolId,
+                dependency.RelationshipType,
+                dependency.IsResolved,
+                dependency.SourceSymbol?.Name,
+                dependency.TargetSymbol?.Name))
+            .ToArray();
 
         var findingItems = findings
             .Select(finding => new AnalysisFindingItem(
@@ -243,10 +299,15 @@ public sealed class PersistedProjectAnalysisService : IProjectAnalysisService
                 finding.Message,
                 finding.SourceFile?.RelativePath,
                 finding.StartLine,
-                finding.EndLine))
+                finding.EndLine,
+                finding.SourceFileId,
+                finding.SymbolId,
+                finding.Symbol?.Name,
+                finding.Symbol?.SymbolKey,
+                finding.ScanId))
             .ToArray();
 
-        progress?.Report(new AnalysisProgress("Persisted analysis loaded.", 4, 4, symbolCount, dependencyCount, findingItems.Length));
+        progress?.Report(new AnalysisProgress("Persisted analysis loaded.", 4, 4, symbolItems.Length, dependencyItems.Length, findingItems.Length));
         return new ProjectAnalysisSnapshot(
             project.Id,
             project.Name,
@@ -255,13 +316,16 @@ public sealed class PersistedProjectAnalysisService : IProjectAnalysisService
             scan.Status,
             scan.FilesDiscovered,
             scan.FilesProcessed,
-            symbolCount,
-            dependencyCount,
+            symbolItems.Length,
+            dependencyItems.Length,
             findingItems.Length,
             findingItems,
             scan.ErrorMessage,
             scan.AnalysisStatus,
-            scan.AnalysisErrorMessage);
+            scan.AnalysisErrorMessage,
+            symbolItems,
+            dependencyItems,
+            sourceFileItems);
     }
 
     private static ProjectAnalysisSnapshot EmptySnapshot(Project project)

@@ -17,8 +17,17 @@ public sealed record ProjectAnalysisSnapshot(
     IReadOnlyList<AnalysisFindingItem> Findings,
     string? ScanErrorMessage = null,
     AnalysisStatus? AnalysisStageStatus = null,
-    string? AnalysisErrorMessage = null)
+    string? AnalysisErrorMessage = null,
+    IReadOnlyList<AnalysisSymbolItem>? Symbols = null,
+    IReadOnlyList<AnalysisDependencyItem>? Dependencies = null,
+    IReadOnlyList<AnalysisSourceFileItem>? SourceFiles = null)
 {
+    public IReadOnlyList<AnalysisSymbolItem> PersistedSymbols => Symbols ?? Array.Empty<AnalysisSymbolItem>();
+
+    public IReadOnlyList<AnalysisDependencyItem> PersistedDependencies => Dependencies ?? Array.Empty<AnalysisDependencyItem>();
+
+    public IReadOnlyList<AnalysisSourceFileItem> PersistedSourceFiles => SourceFiles ?? Array.Empty<AnalysisSourceFileItem>();
+
     public bool HasPersistedResults => SymbolCount > 0 || DependencyCount > 0 || FindingCount > 0;
 
     public bool IsPartial => ScanStatus is not null

@@ -89,11 +89,11 @@
                         <TextBlock FontSize="11"
                                    FontWeight="SemiBold"
                                     Foreground="{DynamicResource MutedTextBrush}"
-                                    Text="PHASE 2 ANALYSIS" />
+                                     Text="PHASE 3 WORKSPACE" />
                         <TextBlock Margin="0,5,0,0"
                                    FontSize="11"
                                     Foreground="{DynamicResource SubtleTextBrush}"
-                                    Text="Persisted analysis workspace surface"
+                                    Text="Persisted analysis, graph, and issue workspace"
                                    TextWrapping="Wrap" />
                     </StackPanel>
                 </Border>
@@ -190,7 +190,7 @@
                                VerticalAlignment="Center"
                                FontSize="11"
                                 Foreground="{DynamicResource SubtleTextBrush}"
-                                Text="ForgeDesk Phase 2" />
+                                 Text="ForgeDesk Phase 3" />
                 </Grid>
             </Border>
         </Grid>

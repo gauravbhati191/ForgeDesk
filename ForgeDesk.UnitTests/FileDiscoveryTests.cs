@@ -37,8 +37,8 @@ public sealed class FileDiscoveryTests
         var result = await new FileDiscoveryService().DiscoverAsync(directory.Path);
 
         Assert.Equal(2, result.Files.Count(file => file.FileName == "Shared.cs"));
-        Assert.Contains(result.Files, file => file.RelativePath == Path.Combine("one", "Shared.cs"));
-        Assert.Contains(result.Files, file => file.RelativePath == Path.Combine("two", "Shared.cs"));
+        Assert.Contains(result.Files, file => file.RelativePath == "one/Shared.cs");
+        Assert.Contains(result.Files, file => file.RelativePath == "two/Shared.cs");
     }
 
     [Fact]

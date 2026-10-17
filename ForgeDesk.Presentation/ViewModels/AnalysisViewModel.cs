@@ -99,6 +99,10 @@ public sealed partial class AnalysisViewModel : ObservableObject
     [ObservableProperty]
     private string? _errorMessage;
 
+    /// <summary>Full persisted read model shared by the graph and issue explorer pages.</summary>
+    [ObservableProperty]
+    private ProjectAnalysisSnapshot? _workspaceSnapshot;
+
     public string SelectedProjectLabel
     {
         get
@@ -211,6 +215,7 @@ public sealed partial class AnalysisViewModel : ObservableObject
         _selectedScanStatus = null;
         _selectedAnalysisStatus = null;
         SelectedProjectName = null;
+        WorkspaceSnapshot = null;
         ResetResults();
         State = AnalysisDisplayState.NoProject;
         StateMessage = "Open an onboarded project to view persisted analysis.";
@@ -291,6 +296,7 @@ public sealed partial class AnalysisViewModel : ObservableObject
 
     private void ApplySnapshot(ProjectAnalysisSnapshot snapshot)
     {
+        WorkspaceSnapshot = snapshot;
         _selectedScanId = snapshot.ScanId;
         _selectedScanStatus = snapshot.ScanStatus;
         _selectedAnalysisStatus = snapshot.AnalysisStageStatus;
@@ -401,6 +407,7 @@ public sealed partial class AnalysisViewModel : ObservableObject
         ProgressPercent = 0;
         ErrorMessage = null;
         IsBusy = true;
+        WorkspaceSnapshot = null;
         RefreshAnalysisCommand.NotifyCanExecuteChanged();
         StartAnalysisCommand.NotifyCanExecuteChanged();
         return new OperationScope(this, source);
