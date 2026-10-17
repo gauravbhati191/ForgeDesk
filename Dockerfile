@@ -3,6 +3,13 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0.416-bookworm-slim AS verify
 WORKDIR /src
 
+# ForgeDesk's Git core uses the local Git executable through a no-shell process
+# adapter. The package is installed only in the verification image; no NuGet
+# dependency or global developer installation is required.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends git \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY global.json .
 COPY ForgeDesk.sln .
 COPY Makefile .

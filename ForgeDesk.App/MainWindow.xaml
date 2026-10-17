@@ -89,7 +89,7 @@
                         <TextBlock FontSize="11"
                                    FontWeight="SemiBold"
                                     Foreground="{DynamicResource MutedTextBrush}"
-                                     Text="PHASE 3 WORKSPACE" />
+                                     Text="PHASE 4 WORKSPACE" />
                         <TextBlock Margin="0,5,0,0"
                                    FontSize="11"
                                     Foreground="{DynamicResource SubtleTextBrush}"
@@ -190,7 +190,7 @@
                                VerticalAlignment="Center"
                                FontSize="11"
                                 Foreground="{DynamicResource SubtleTextBrush}"
-                                 Text="ForgeDesk Phase 3" />
+                                  Text="ForgeDesk Phase 4" />
                 </Grid>
             </Border>
         </Grid>

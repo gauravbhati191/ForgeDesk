@@ -1,0 +1,467 @@
+<UserControl x:Class="ForgeDesk.Presentation.Views.GitChangesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:ForgeDesk.Presentation.Controls">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="32,28,32,36">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="VERSION CONTROL" Style="{StaticResource PageEyebrowStyle}" />
+                    <TextBlock Margin="0,8,0,0"
+                               Text="Git changes"
+                               Style="{StaticResource PageTitleStyle}" />
+                    <TextBlock Margin="0,8,0,0"
+                               Text="Inspect the selected project's local repository, working-tree paths, and bounded recent history. ForgeDesk never mutates repository files from this page."
+                               Style="{StaticResource PageSubtitleStyle}" />
+                </StackPanel>
+                <Button Grid.Column="1"
+                        Margin="14,0,8,0"
+                        VerticalAlignment="Center"
+                        AutomationProperties.Name="Refresh Git status and history"
+                        Command="{Binding RefreshCommand}"
+                        Content="Refresh"
+                        ToolTip="Read current local Git status and bounded recent history"
+                        Style="{StaticResource SecondaryButtonStyle}" />
+                <Button Grid.Column="2"
+                        VerticalAlignment="Center"
+                        AutomationProperties.Name="Cancel Git refresh"
+                        Command="{Binding CancelCommand}"
+                        Content="Cancel"
+                        ToolTip="Cancel the current local Git read"
+                        Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}"
+                        Style="{StaticResource SecondaryButtonStyle}" />
+            </Grid>
+
+            <Border Margin="0,26,0,0" Style="{StaticResource CardBorderStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <controls:VectorIcon Grid.Column="0"
+                                         Width="28"
+                                         Height="28"
+                                         Margin="0,2,16,0"
+                                         VerticalAlignment="Top"
+                                         IconKey="Icon.Git"
+                                         Foreground="{DynamicResource AccentBrush}" />
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="{Binding StatusSummary}" Style="{StaticResource CardTitleStyle}" />
+                        <TextBlock Margin="0,5,0,0"
+                                   Text="{Binding StateMessage}"
+                                   Style="{StaticResource BodyTextStyle}" />
+                        <ProgressBar Margin="0,14,0,0"
+                                     Height="5"
+                                     IsIndeterminate="True"
+                                     Visibility="{Binding ShowLoading, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                        <TextBlock Margin="0,6,0,0"
+                                   Text="Reading only local repository metadata; no remotes or credentials are used."
+                                   Style="{StaticResource BodyTextStyle}"
+                                   Visibility="{Binding ShowLoading, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="2" Margin="18,0,0,0" HorizontalAlignment="Right">
+                        <TextBlock Text="Project root" Style="{StaticResource FieldLabelStyle}" />
+                        <TextBlock Margin="0,4,0,0"
+                                   MaxWidth="260"
+                                   Text="{Binding ProjectRootLabel}"
+                                   TextTrimming="CharacterEllipsis"
+                                   ToolTip="{Binding ProjectRootLabel}"
+                                   Style="{StaticResource BodyTextStyle}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <Border Margin="0,16,0,0"
+                    Padding="18"
+                    Background="{DynamicResource SurfaceAltBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="10"
+                    Visibility="{Binding ShowNoProject, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel>
+                    <TextBlock Text="No project selected" Style="{StaticResource CardTitleStyle}" />
+                    <TextBlock Margin="0,5,0,0"
+                               Text="Open or reopen an onboarded project from Projects. Git status is loaded from the project root exposed by the analysis workspace."
+                               Style="{StaticResource BodyTextStyle}" />
+                </StackPanel>
+            </Border>
+
+            <Border Margin="0,16,0,0"
+                    Padding="18"
+                    Background="{DynamicResource SurfaceAltBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="10"
+                    Visibility="{Binding ShowLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <TextBlock Text="Waiting for the selected project workspace snapshot or reading the local repository..."
+                           Style="{StaticResource BodyTextStyle}" />
+            </Border>
+
+            <Border Margin="0,16,0,0"
+                    Padding="18"
+                    Background="{DynamicResource SurfaceAltBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="10"
+                    Visibility="{Binding ShowNotRepository, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel>
+                    <TextBlock Text="Not a Git repository" Style="{StaticResource CardTitleStyle}" />
+                    <TextBlock Margin="0,5,0,0" Text="{Binding StateMessage}" Style="{StaticResource BodyTextStyle}" />
+                    <TextBlock Margin="0,6,0,0"
+                               Text="No branch, HEAD, changes, or history are shown because Git found no repository marker in this project path or its parents."
+                               Style="{StaticResource BodyTextStyle}" />
+                </StackPanel>
+            </Border>
+
+            <Border Margin="0,16,0,0"
+                    Padding="18"
+                    Background="{DynamicResource SurfaceAltBrush}"
+                    BorderBrush="{DynamicResource WarningBrush}"
+                    BorderThickness="1"
+                    CornerRadius="10"
+                    Visibility="{Binding ShowUnreadable, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel>
+                    <TextBlock Text="Repository unreadable" Style="{StaticResource CardTitleStyle}" />
+                    <TextBlock Margin="0,5,0,0" Text="{Binding StateMessage}" Style="{StaticResource BodyTextStyle}" />
+                    <TextBlock Margin="0,6,0,0"
+                               Text="{Binding ErrorMessage}"
+                               Foreground="{DynamicResource WarningBrush}"
+                               TextWrapping="Wrap" />
+                </StackPanel>
+            </Border>
+
+            <Border Margin="0,16,0,0"
+                    Padding="18"
+                    Background="{DynamicResource SurfaceAltBrush}"
+                    BorderBrush="{DynamicResource DangerBrush}"
+                    BorderThickness="1"
+                    CornerRadius="10"
+                    Visibility="{Binding ShowError, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel>
+                    <TextBlock Text="Git status unavailable" Style="{StaticResource CardTitleStyle}" />
+                    <TextBlock Margin="0,5,0,0" Text="{Binding StateMessage}" Style="{StaticResource BodyTextStyle}" />
+                    <TextBlock Margin="0,6,0,0"
+                               Text="{Binding ErrorMessage}"
+                               Foreground="{DynamicResource DangerBrush}"
+                               TextWrapping="Wrap" />
+                </StackPanel>
+            </Border>
+
+            <Border Margin="0,16,0,0"
+                    Padding="18"
+                    Background="{DynamicResource SurfaceAltBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="10"
+                    Visibility="{Binding ShowCancelled, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel>
+                    <TextBlock Text="Git refresh cancelled" Style="{StaticResource CardTitleStyle}" />
+                    <TextBlock Margin="0,5,0,0" Text="{Binding StateMessage}" Style="{StaticResource BodyTextStyle}" />
+                </StackPanel>
+            </Border>
+
+            <Border Margin="0,16,0,0"
+                    Padding="18"
+                    Style="{StaticResource CardBorderStyle}"
+                    Visibility="{Binding HasRepositoryMetadata, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel>
+                    <TextBlock Text="Repository" Style="{StaticResource CardTitleStyle}" />
+                    <Grid Margin="0,14,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="150" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Root" Style="{StaticResource FieldLabelStyle}" />
+                        <TextBlock Grid.Column="1"
+                                   Margin="10,0,18,0"
+                                   Text="{Binding RepositoryInfo.RepositoryRootLabel}"
+                                   TextTrimming="CharacterEllipsis"
+                                   ToolTip="{Binding RepositoryInfo.RepositoryRootLabel}"
+                                   Style="{StaticResource BodyTextStyle}" />
+                        <TextBlock Grid.Column="2" Text="Branch" Style="{StaticResource FieldLabelStyle}" />
+                        <TextBlock Grid.Column="3"
+                                   Margin="10,0,0,0"
+                                   Text="{Binding RepositoryInfo.BranchLabel}"
+                                   Style="{StaticResource BodyTextStyle}" />
+                    </Grid>
+                    <Grid Margin="0,12,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="150" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="HEAD" Style="{StaticResource FieldLabelStyle}" />
+                        <TextBlock Grid.Column="1"
+                                   Margin="10,0,18,0"
+                                   Text="{Binding RepositoryInfo.HeadIdLabel}"
+                                   TextTrimming="CharacterEllipsis"
+                                   ToolTip="{Binding RepositoryInfo.HeadIdLabel}"
+                                   Style="{StaticResource BodyTextStyle}" />
+                        <TextBlock Grid.Column="2" Text="HEAD date" Style="{StaticResource FieldLabelStyle}" />
+                        <TextBlock Grid.Column="3"
+                                   Margin="10,0,0,0"
+                                   Text="{Binding RepositoryInfo.HeadDateLabel}"
+                                   Style="{StaticResource BodyTextStyle}" />
+                    </Grid>
+                    <TextBlock Margin="0,14,0,0"
+                               Text="{Binding RepositoryInfo.HeadMessageLabel}"
+                               ToolTip="HEAD commit message"
+                               Style="{StaticResource CardTitleStyle}" />
+                    <TextBlock Margin="0,5,0,0"
+                               Text="{Binding RepositoryInfo.HeadAuthorLabel}"
+                               Style="{StaticResource BodyTextStyle}" />
+                </StackPanel>
+            </Border>
+
+            <Border Margin="0,16,0,0"
+                    Padding="18"
+                    Style="{StaticResource CardBorderStyle}"
+                    Visibility="{Binding ShowChangeGroups, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Working-tree changes" Style="{StaticResource CardTitleStyle}" />
+                            <TextBlock Margin="0,5,0,0" Text="{Binding ChangeCountLabel}" Style="{StaticResource BodyTextStyle}" />
+                        </StackPanel>
+                        <TextBlock Grid.Column="1"
+                                   VerticalAlignment="Center"
+                                   Text="Bounded result"
+                                   Foreground="{DynamicResource WarningBrush}"
+                                   Visibility="{Binding ShowChangesTruncated, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    </Grid>
+                    <ItemsControl Margin="0,12,0,0" ItemsSource="{Binding ChangeGroups}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Margin="0,0,0,12"
+                                        Padding="12"
+                                        Background="{DynamicResource SurfaceAltBrush}"
+                                        BorderBrush="{DynamicResource BorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="8"
+                                        AutomationProperties.Name="{Binding AccessibilityName}">
+                                    <StackPanel>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="{Binding Title}" Style="{StaticResource CardTitleStyle}" />
+                                            <TextBlock Grid.Column="1" Text="{Binding CountLabel}" Style="{StaticResource FieldLabelStyle}" />
+                                        </Grid>
+                                        <ItemsControl Margin="0,8,0,0" ItemsSource="{Binding Changes}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Margin="0,3,0,0"
+                                                            Padding="8,7"
+                                                            Background="{DynamicResource SurfaceBrush}"
+                                                            BorderBrush="{DynamicResource BorderBrush}"
+                                                            BorderThickness="1"
+                                                            CornerRadius="6"
+                                                            AutomationProperties.Name="{Binding AccessibilityName}"
+                                                            ToolTip="{Binding Tooltip}">
+                                                        <Grid>
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="Auto" />
+                                                                <ColumnDefinition Width="*" />
+                                                                <ColumnDefinition Width="Auto" />
+                                                            </Grid.ColumnDefinitions>
+                                                            <TextBlock Grid.Column="0"
+                                                                       Width="34"
+                                                                       Text="{Binding StatusCodeLabel}"
+                                                                       Foreground="{DynamicResource AccentBrush}"
+                                                                       FontWeight="SemiBold" />
+                                                            <StackPanel Grid.Column="1">
+                                                                <TextBlock Text="{Binding RelativePath}"
+                                                                           TextTrimming="CharacterEllipsis"
+                                                                           Style="{StaticResource BodyTextStyle}" />
+                                                                <TextBlock Margin="0,2,0,0"
+                                                                           Text="{Binding OriginalPathLabel}"
+                                                                           Foreground="{DynamicResource SubtleTextBrush}"
+                                                                           Visibility="{Binding HasOriginalPath, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                                            </StackPanel>
+                                                            <TextBlock Grid.Column="2"
+                                                                       Margin="12,0,0,0"
+                                                                       Text="{Binding KindLabel}"
+                                                                       Foreground="{DynamicResource MutedTextBrush}"
+                                                                       TextAlignment="Right" />
+                                                        </Grid>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+
+            <Border Margin="0,16,0,0"
+                    Padding="18"
+                    Background="{DynamicResource SurfaceAltBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="10"
+                    Visibility="{Binding ShowCleanWorkspace, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel>
+                    <TextBlock Text="Working tree clean" Style="{StaticResource CardTitleStyle}" />
+                    <TextBlock Margin="0,5,0,0"
+                               Text="No staged, unstaged, untracked, conflicted, or other working-tree paths were reported."
+                               Style="{StaticResource BodyTextStyle}" />
+                </StackPanel>
+            </Border>
+
+            <Border Margin="0,16,0,0"
+                    Padding="18"
+                    Background="{DynamicResource SurfaceAltBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="10"
+                    Visibility="{Binding ShowEmpty, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel>
+                    <TextBlock Text="Repository is empty" Style="{StaticResource CardTitleStyle}" />
+                    <TextBlock Margin="0,5,0,0" Text="{Binding StateMessage}" Style="{StaticResource BodyTextStyle}" />
+                </StackPanel>
+            </Border>
+
+            <Border Margin="0,16,0,0"
+                    Padding="18"
+                    Style="{StaticResource CardBorderStyle}"
+                    Visibility="{Binding HasRepository, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Recent commits" Style="{StaticResource CardTitleStyle}" />
+                            <TextBlock Margin="0,5,0,0" Text="{Binding HistoryCountLabel}" Style="{StaticResource BodyTextStyle}" />
+                        </StackPanel>
+                        <TextBlock Grid.Column="1"
+                                   VerticalAlignment="Center"
+                                   Text="Bounded history"
+                                   Foreground="{DynamicResource WarningBrush}"
+                                   Visibility="{Binding ShowHistoryTruncated, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    </Grid>
+
+                    <TextBlock Margin="0,16,0,0"
+                               Text="No recent commits are available for this repository."
+                               Style="{StaticResource BodyTextStyle}"
+                               Visibility="{Binding ShowHistoryEmpty, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+                    <ListBox Margin="0,12,0,0"
+                             AutomationProperties.Name="Recent Git commits"
+                             ItemsSource="{Binding RecentCommits}"
+                             SelectedItem="{Binding SelectedCommit, Mode=TwoWay}"
+                             Visibility="{Binding HasHistory, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Border Margin="0,3,0,0"
+                                        Padding="10"
+                                        Background="{DynamicResource SurfaceAltBrush}"
+                                        BorderBrush="{DynamicResource BorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="7"
+                                        AutomationProperties.Name="{Binding AccessibilityName}"
+                                        ToolTip="{Binding IdTooltip}">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0"
+                                                   Width="92"
+                                                   Text="{Binding IdLabel}"
+                                                   Foreground="{DynamicResource AccentBrush}"
+                                                   FontFamily="Consolas"
+                                                   FontWeight="SemiBold" />
+                                        <StackPanel Grid.Column="1">
+                                            <TextBlock Text="{Binding MessageLabel}"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       Style="{StaticResource CardTitleStyle}" />
+                                            <TextBlock Margin="0,3,0,0"
+                                                       Text="{Binding AuthorLabel}"
+                                                       Style="{StaticResource BodyTextStyle}" />
+                                        </StackPanel>
+                                        <TextBlock Grid.Column="2"
+                                                   Margin="16,0,0,0"
+                                                   Text="{Binding DateLabel}"
+                                                   Foreground="{DynamicResource MutedTextBrush}"
+                                                   TextAlignment="Right" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+
+                    <Border Margin="0,16,0,0"
+                            Padding="14"
+                            Background="{DynamicResource SurfaceAltBrush}"
+                            BorderBrush="{DynamicResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Visibility="{Binding ShowSelectedCommitFiles, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <StackPanel>
+                            <TextBlock Text="{Binding SelectedCommitLabel}" Style="{StaticResource CardTitleStyle}" />
+                            <TextBlock Margin="0,5,0,0"
+                                       Text="{Binding SelectedCommitFilesMessage}"
+                                       Style="{StaticResource BodyTextStyle}" />
+                            <ItemsControl Margin="0,10,0,0"
+                                          ItemsSource="{Binding SelectedCommitFiles}"
+                                          Visibility="{Binding SelectedCommit.HasChangedFiles, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Margin="0,3,0,0"
+                                                Padding="8,7"
+                                                Background="{DynamicResource SurfaceBrush}"
+                                                BorderBrush="{DynamicResource BorderBrush}"
+                                                BorderThickness="1"
+                                                CornerRadius="6"
+                                                AutomationProperties.Name="{Binding AccessibilityName}"
+                                                ToolTip="{Binding Tooltip}">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel Grid.Column="0">
+                                                    <TextBlock Text="{Binding RelativePath}"
+                                                               TextTrimming="CharacterEllipsis"
+                                                               Style="{StaticResource BodyTextStyle}" />
+                                                    <TextBlock Margin="0,2,0,0"
+                                                               Text="{Binding OriginalPathLabel}"
+                                                               Foreground="{DynamicResource SubtleTextBrush}"
+                                                               Visibility="{Binding HasOriginalPath, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                                </StackPanel>
+                                                <TextBlock Grid.Column="1"
+                                                           Margin="12,0,0,0"
+                                                           Text="{Binding KindLabel}"
+                                                           Foreground="{DynamicResource MutedTextBrush}" />
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

@@ -19,6 +19,8 @@ public static class AppServiceCollectionExtensions
         services.AddSingleton<IProjectWorkspaceService, ApplicationProjectWorkspaceService>();
         services.AddSingleton<IProjectAnalysisService, PersistedProjectAnalysisService>();
         services.AddSingleton<IProjectGraphService, PersistedProjectGraphService>();
+        services.AddSingleton<IProjectReportService, PersistedProjectReportService>();
+        services.AddSingleton<IReportPathPicker, WindowsReportPathPicker>();
         services.AddSingleton<ISourceNavigationService, SafeSourceNavigationService>();
         services.AddSingleton<IThemePreferenceStore, ApplicationThemePreferenceStore>();
         services.AddSingleton<IThemeResourceManager>(_ => new WpfThemeResourceManager(application));

@@ -9,7 +9,7 @@ ForgeDesk.App (WPF composition root)
         |          |
         |          +--> ForgeDesk.Application (use cases/contracts)
         |
-        +--> ForgeDesk.Infrastructure (EF Core/filesystem implementations)
+        +--> ForgeDesk.Infrastructure (EF Core/filesystem/Git implementations)
                    |
                    +--> ForgeDesk.Application
                    +--> ForgeDesk.Domain
@@ -93,6 +93,19 @@ dependencies, and findings after a successful engine run. Analysis is registered
 from Infrastructure, but workspace loading and Roslyn interpretation remain in
 the dedicated Analysis project rather than in WPF.
 
+`GitProcessRepository` is the Phase 4 local Git adapter. `GitRepositoryService`
+locates the nearest `.git` directory or worktree metadata file, while the adapter
+uses bounded, cancellable, no-shell `git` subprocesses for status, HEAD metadata,
+and recent history. It has no mutating or remote operations and returns explicit
+not-a-repository, clean, dirty, and unreadable states. See
+`docs/PHASE4_GIT_CORE.md` for the contracts, parser limits, and test matrix.
+
+`AnalysisReportDataSource` reads one selected project/scan with no-tracking,
+bounded EF queries. `AnalysisReportService` maps those rows to deterministic
+JSON/HTML/CSV models, and `AnalysisComparisonService` compares two selected
+reports without database IDs. Report exports use atomic temporary files and
+redact absolute roots by default.
+
 ## Startup flow
 
 ```text
@@ -101,7 +114,7 @@ App.OnStartup
   -> AddForgeDeskApp
        -> AddForgeDeskInfrastructure
        -> AddForgeDeskPresentation
-       -> register Windows picker, DB workspace adapter, persisted analysis adapter, theme resource manager
+       -> register Windows pickers, DB workspace/report adapters, Git adapter, theme resource manager
   -> Host.StartAsync
   -> DatabaseInitializer.InitializeAsync
        -> ensure LocalApplicationData/ForgeDesk exists
@@ -152,8 +165,9 @@ than executed synchronously on the UI thread.
 
 `IClock`, `IProjectRepository`, `IProjectOnboardingStore`, `IFileDiscoveryService`,
 `IProjectFolderPicker`, `IProjectWorkspaceService`, `IProjectAnalysisService`,
-`IAnalysisEngine`, `IAnalysisRepository`, and `IThemePreferenceStore` provide
-meaningful seams for deterministic tests.
+`IGitRepositoryService`, `IAnalysisReportDataSource`, `IAnalysisReportService`,
+`IAnalysisComparisonService`, `IAnalysisEngine`, `IAnalysisRepository`, and
+`IThemePreferenceStore` provide meaningful seams for deterministic tests.
 Unit tests use in-memory doubles for application boundaries and temporary
 directories. Integration tests use the real EF Core SQLite context and the
 checked-in migration in a temporary database.

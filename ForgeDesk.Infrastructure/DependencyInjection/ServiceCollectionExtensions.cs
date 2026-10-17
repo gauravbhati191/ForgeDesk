@@ -36,8 +36,11 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IScanLifecycleService, ScanLifecycleService>();
         services.AddScoped<IThemeSettingsService, ThemeSettingsService>();
         services.AddScoped<IAnalysisRepository, AnalysisRepository>();
+        services.AddScoped<IAnalysisReportDataSource, AnalysisReportDataSource>();
         services.AddScoped<ForgeDesk.Application.IAnalysisEngine, RoslynAnalysisEngine>();
         services.AddScoped<IAnalysisService, AnalysisService>();
+        services.AddScoped<IAnalysisReportService, AnalysisReportService>();
+        services.AddScoped<IAnalysisComparisonService, AnalysisComparisonService>();
         services.AddScoped<IGraphQueryRepository, GraphQueryRepository>();
         services.AddScoped<GraphDataBuilder>();
         services.AddScoped<IGraphLayoutService, DeterministicGraphLayoutService>();
@@ -45,6 +48,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<GraphQueryService>();
         services.AddScoped<IGraphQueryService>(provider => provider.GetRequiredService<GraphQueryService>());
         services.AddScoped<IGraphService>(provider => provider.GetRequiredService<GraphQueryService>());
+        services.AddScoped<IGitRepositoryReader, GitProcessRepository>();
+        services.AddScoped<IGitRepositoryService, GitRepositoryService>();
         services.AddScoped<DatabaseInitializer>();
         return services;
     }

@@ -9,6 +9,7 @@
 - EF Core SQLite and Design 8.0.11.
 - xUnit 2.9.2 with Microsoft.NET.Test.Sdk 17.11.1.
 - `dotnet-ef` 8.0.11 from `.config/dotnet-tools.json`.
+- Git 2.x on `PATH` for the read-only Git core and its temporary-repository integration tests.
 
 The Linux verification container used `DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1` because ICU is not installed. A normal Windows SDK installation does not need that variable.
 
@@ -22,7 +23,7 @@ dotnet tool restore
 dotnet restore ForgeDesk.sln --locked-mode
 ```
 
-No global NuGet packages or global EF tools are required. The repository's local tool manifest keeps the EF CLI version reproducible. Docker users can run `docker build -t forgedesk-phase1 .` instead of installing SDK tooling locally.
+No global NuGet packages or global EF tools are required. The repository's local tool manifest keeps the EF CLI version reproducible. Docker users can run `docker build -t forgedesk-phase4 .` instead of installing SDK tooling locally.
 
 ## Checks
 
@@ -32,7 +33,7 @@ The canonical check is:
 make test
 ```
 
-It runs restore, a Release solution build, 13 unit tests, and 4 integration tests. The tests are local-only and use temporary folders/databases. Useful focused commands are:
+It runs restore, a Release solution build, and both local-only test suites. The tests use temporary folders, Git repositories, and databases. Useful focused commands are:
 
 ```bash
 make test-unit

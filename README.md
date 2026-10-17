@@ -13,7 +13,7 @@
 
 ---
 
-[Repository](https://github.com/gauravbhati191/ForgeDesk) • [Architecture](docs/ARCHITECTURE.md) • [Database](docs/DATABASE.md) • [Development](docs/DEVELOPMENT.md) • [Phase 1](docs/PHASE1_IMPLEMENTATION.md) • [Phase 2](docs/PHASE2_IMPLEMENTATION.md) • [Phase 3](docs/PHASE3_IMPLEMENTATION.md)
+[Repository](https://github.com/gauravbhati191/ForgeDesk) • [Architecture](docs/ARCHITECTURE.md) • [Database](docs/DATABASE.md) • [Development](docs/DEVELOPMENT.md) • [Phase 1](docs/PHASE1_IMPLEMENTATION.md) • [Phase 2](docs/PHASE2_IMPLEMENTATION.md) • [Phase 3](docs/PHASE3_IMPLEMENTATION.md) • [Phase 4 implementation](docs/PHASE4_IMPLEMENTATION.md) • [Phase 4 Git core](docs/PHASE4_GIT_CORE.md) • [Phase 4 reports](docs/PHASE4_REPORTS.md)
 
 </div>
 
@@ -42,6 +42,7 @@ ForgeDesk/
 ├── 🗄️ ForgeDesk.Infrastructure # EF Core SQLite, Migrations, Repositories, File System Scanners
 ├── 🔬 ForgeDesk.Analysis       # (Phase 2) MSBuild/Roslyn semantic analysis and quality rules
 ├── 🕸️ ForgeDesk.Graph          # (Phase 3) Persisted graph contracts, filtering, and layout
+├── 🔗 Local Git + reports       # (Phase 4) Read-only repository context and safe exports
 └── 🧪 ForgeDesk.Tests/         # Deterministic Unit & Integration Test Suites
     ├── ForgeDesk.UnitTests
     └── ForgeDesk.IntegrationTests
@@ -55,6 +56,7 @@ ForgeDesk/
 
 - **OS**: Windows 10 / 11 (for native WPF desktop shell)
 - **SDK**: [.NET SDK 8.0.416+](https://dotnet.microsoft.com/download/dotnet/8.0) (Pinned via `global.json`)
+- **Git**: Git 2.x on `PATH` for local repository inspection and Git integration tests
 - **IDE**: Visual Studio 2022 (with *.NET Desktop Development* workload) or VS Code / JetBrains Rider
 
 ---
@@ -86,7 +88,8 @@ dotnet run --project ForgeDesk.App/ForgeDesk.App.csproj --configuration Release
 ### 🔎 Analysis, graph, and issue workspace
 
 After onboarding or reopening a project from **Projects**, use **Code Explorer**,
-**Dependencies**, or **Code Health** to run and view the latest analysis
+**Dependencies**, **Code Health**, **Git Changes**, or **Reports** to work with the
+latest persisted analysis
 snapshot. **Start analysis** invokes the application analysis service through
 the App adapter, reports progress, and persists real symbol, dependency, and
 finding rows. **Dependencies** renders those persisted symbols and edges in a
@@ -101,6 +104,21 @@ analysis. Projects without analysis rows show an explicit empty state, while
 incomplete scans show partial data and persistence failures show an error state.
 See [the Phase 3 implementation notes](docs/PHASE3_IMPLEMENTATION.md) for the
 graph semantics, source validation, and Windows manual verification procedure.
+
+**Git Changes** reads the nearest local repository using the Git executable with
+bounded, no-shell, read-only commands. It shows repository state, branch/HEAD
+metadata, staged/unstaged/untracked/conflicted paths, and bounded recent commits.
+Projects without Git continue to work and show an explicit not-a-repository state;
+ForgeDesk never stages, commits, resets, checks out, pulls, or pushes files.
+
+**Reports** builds from an explicitly selected persisted analysis run. It can
+export safe, self-contained JSON, HTML, or findings CSV files through the native
+save dialog, redacts absolute paths by default, includes limitations and optional
+current Git context, and compares a selected older run with the current run using
+stable finding fingerprints. Report-time Git context is not presented as a
+historical commit association because the current schema does not persist one.
+See [the Git core](docs/PHASE4_GIT_CORE.md) and [report notes](docs/PHASE4_REPORTS.md)
+for limits, privacy behavior, and comparison semantics.
 
 ---
 
@@ -159,7 +177,11 @@ Database files are cleanly stored in `%LOCALAPPDATA%\ForgeDesk\forgedesk.db`, ke
   - Persisted dependency graph with deterministic layout, pan/zoom, selection, and filters
   - Symbol details, related finding navigation, and scan-scoped graph states
   - Finding search/filter/sort and safe read-only source preview with line highlighting
-- [ ] **Phase 4: Git Integration & Intelligent Reports**
+- [x] **Phase 4: Git Integration & Intelligent Reports**
+  - [x] Read-only local Git core: nearest repository detection, status, worktrees, HEAD metadata, and bounded history
+  - [x] Scan-scoped deterministic JSON, self-contained HTML, and CSV findings exports
+  - [x] Read-only comparison of persisted analysis runs with stable finding fingerprints
+  - [x] Native WPF Git Changes and Reports pages with export/comparison workflow
 
 ---
 

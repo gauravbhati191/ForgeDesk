@@ -9,7 +9,6 @@ namespace ForgeDesk.Presentation.ViewModels;
 public sealed partial class MainWindowViewModel : ObservableObject
 {
     private readonly ILogger<MainWindowViewModel> _logger;
-    private readonly UnavailablePageViewModelFactory _unavailablePageFactory;
 
     public MainWindowViewModel(
         HomeViewModel home,
@@ -17,8 +16,9 @@ public sealed partial class MainWindowViewModel : ObservableObject
         AnalysisViewModel analysis,
         DependencyGraphViewModel dependencyGraph,
         IssueExplorerViewModel issueExplorer,
+        GitChangesViewModel gitChanges,
+        ReportsViewModel reports,
         SettingsViewModel settings,
-        UnavailablePageViewModelFactory unavailablePageFactory,
         ILogger<MainWindowViewModel> logger)
     {
         Home = home;
@@ -26,8 +26,9 @@ public sealed partial class MainWindowViewModel : ObservableObject
         Analysis = analysis;
         DependencyGraph = dependencyGraph;
         IssueExplorer = issueExplorer;
+        GitChanges = gitChanges;
+        Reports = reports;
         Settings = settings;
-        _unavailablePageFactory = unavailablePageFactory;
         _logger = logger;
 
         NavigationItems = new[]
@@ -60,6 +61,10 @@ public sealed partial class MainWindowViewModel : ObservableObject
     public DependencyGraphViewModel DependencyGraph { get; }
 
     public IssueExplorerViewModel IssueExplorer { get; }
+
+    public GitChangesViewModel GitChanges { get; }
+
+    public ReportsViewModel Reports { get; }
 
     public SettingsViewModel Settings { get; }
 
@@ -95,8 +100,10 @@ public sealed partial class MainWindowViewModel : ObservableObject
         NavigationPage.CodeExplorer => "Review persisted symbols and source locations for the selected project.",
         NavigationPage.Dependencies => "Explore persisted dependency relationships for the selected project.",
         NavigationPage.CodeHealth => "Search and navigate persisted code-health findings for the selected project.",
+        NavigationPage.GitChanges => "Inspect local Git status and bounded commit history without mutating the repository.",
+        NavigationPage.Reports => "Export and compare reports from explicitly selected persisted analysis runs.",
         NavigationPage.Settings => "Adjust the shell to fit your workspace.",
-        _ => "Phase 2 capability surface."
+        _ => "Phase 4 developer workflow surface."
     };
 
     public string ProjectContextLabel => string.IsNullOrWhiteSpace(CurrentProjectPath)
@@ -131,13 +138,9 @@ public sealed partial class MainWindowViewModel : ObservableObject
             NavigationPage.CodeExplorer => Analysis,
             NavigationPage.Dependencies => DependencyGraph,
             NavigationPage.CodeHealth => IssueExplorer,
+            NavigationPage.GitChanges => GitChanges,
+            NavigationPage.Reports => Reports,
             NavigationPage.Settings => Settings,
-            NavigationPage.GitChanges => _unavailablePageFactory.Create(
-                "Git Changes",
-                "Version-control changes"),
-            NavigationPage.Reports => _unavailablePageFactory.Create(
-                "Reports",
-                "Analysis reports"),
             _ => Home
         };
 

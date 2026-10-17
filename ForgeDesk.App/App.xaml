@@ -29,6 +29,12 @@
             <DataTemplate DataType="{x:Type vm:IssueExplorerViewModel}">
                 <views:IssueExplorerView />
             </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:GitChangesViewModel}">
+                <views:GitChangesView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:ReportsViewModel}">
+                <views:ReportsView />
+            </DataTemplate>
             <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
                 <views:SettingsView />
             </DataTemplate>

@@ -1,0 +1,211 @@
+<UserControl x:Class="ForgeDesk.Presentation.Views.ReportsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="30,24,30,34">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="ANALYSIS REPORTS" Style="{StaticResource PageEyebrowStyle}" />
+                    <TextBlock Margin="0,7,0,0" Text="Professional reports" Style="{StaticResource PageTitleStyle}" />
+                    <TextBlock Margin="0,7,0,0"
+                               Text="Export actual persisted analysis runs as safe local JSON, HTML, or CSV, and compare compatible runs without changing project data."
+                               Style="{StaticResource PageSubtitleStyle}" />
+                </StackPanel>
+                <Button Grid.Column="1"
+                        Margin="14,0,8,0"
+                        VerticalAlignment="Center"
+                        AutomationProperties.Name="Refresh analysis reports"
+                        Command="{Binding RefreshCommand}"
+                        Content="Refresh"
+                        ToolTip="Reload persisted analysis runs and the current report"
+                        Style="{StaticResource SecondaryButtonStyle}" />
+                <Button Grid.Column="2"
+                        VerticalAlignment="Center"
+                        AutomationProperties.Name="Cancel report operation"
+                        Command="{Binding CancelCommand}"
+                        Content="Cancel"
+                        Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}"
+                        Style="{StaticResource SecondaryButtonStyle}" />
+            </Grid>
+
+            <Border Margin="0,22,0,0" Style="{StaticResource CardBorderStyle}">
+                <StackPanel>
+                    <TextBlock Text="{Binding StateMessage}" Style="{StaticResource CardTitleStyle}" />
+                    <TextBlock Margin="0,5,0,0" Text="{Binding CurrentScanLabel}" Style="{StaticResource BodyTextStyle}" />
+                    <ProgressBar Margin="0,13,0,0"
+                                 Height="5"
+                                 IsIndeterminate="True"
+                                 Visibility="{Binding ShowLoading, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                </StackPanel>
+            </Border>
+
+            <Border Margin="0,16,0,0"
+                    Padding="18"
+                    Background="{DynamicResource SurfaceAltBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="10"
+                    Visibility="{Binding ShowNoProject, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <TextBlock Text="Open an onboarded project with a persisted analysis run to generate a report." Style="{StaticResource BodyTextStyle}" />
+            </Border>
+            <Border Margin="0,16,0,0"
+                    Padding="18"
+                    Background="{DynamicResource SurfaceAltBrush}"
+                    BorderBrush="{DynamicResource WarningBrush}"
+                    BorderThickness="1"
+                    CornerRadius="10"
+                    Visibility="{Binding ShowEmpty, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <TextBlock Text="The selected project has no persisted analysis run yet. Run analysis from Code Explorer, then return here." Style="{StaticResource BodyTextStyle}" TextWrapping="Wrap" />
+            </Border>
+            <Border Margin="0,16,0,0"
+                    Padding="18"
+                    Background="{DynamicResource SurfaceAltBrush}"
+                    BorderBrush="{DynamicResource DangerBrush}"
+                    BorderThickness="1"
+                    CornerRadius="10"
+                    Visibility="{Binding ShowError, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel>
+                    <TextBlock Text="Report unavailable" Style="{StaticResource CardTitleStyle}" />
+                    <TextBlock Margin="0,5,0,0" Text="{Binding ErrorMessage}" Foreground="{DynamicResource DangerBrush}" TextWrapping="Wrap" />
+                </StackPanel>
+            </Border>
+            <Border Margin="0,16,0,0"
+                    Padding="18"
+                    Background="{DynamicResource SurfaceAltBrush}"
+                    BorderBrush="{DynamicResource WarningBrush}"
+                    BorderThickness="1"
+                    CornerRadius="10"
+                    Visibility="{Binding ShowCancelled, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <TextBlock Text="{Binding StateMessage}" Style="{StaticResource BodyTextStyle}" />
+            </Border>
+
+            <Grid Margin="0,16,0,0" Visibility="{Binding ShowResults, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1.35*" />
+                    <ColumnDefinition Width="14" />
+                    <ColumnDefinition Width="1*" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <Border Padding="18" Style="{StaticResource CardBorderStyle}">
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="Selected run" Style="{StaticResource CardTitleStyle}" />
+                                    <TextBlock Margin="0,5,0,0" Text="{Binding ReportStatusLabel}" Style="{StaticResource BodyTextStyle}" />
+                                    <TextBlock Margin="0,4,0,0" Text="{Binding ReportSummaryLabel}" Style="{StaticResource BodyTextStyle}" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                    <Button Margin="7,0,0,0"
+                                            AutomationProperties.Name="Build report"
+                                            Command="{Binding BuildReportCommand}"
+                                            Content="Build"
+                                            Style="{StaticResource SecondaryButtonStyle}" />
+                                    <Button Margin="7,0,0,0"
+                                            AutomationProperties.Name="Export JSON report"
+                                            Command="{Binding ExportJsonCommand}"
+                                            Content="JSON"
+                                            Style="{StaticResource SecondaryButtonStyle}" />
+                                    <Button Margin="7,0,0,0"
+                                            AutomationProperties.Name="Export HTML report"
+                                            Command="{Binding ExportHtmlCommand}"
+                                            Content="HTML"
+                                            Style="{StaticResource PrimaryButtonStyle}" />
+                                    <Button Margin="7,0,0,0"
+                                            AutomationProperties.Name="Export CSV findings"
+                                            Command="{Binding ExportCsvCommand}"
+                                            Content="CSV"
+                                            Style="{StaticResource SecondaryButtonStyle}" />
+                                </StackPanel>
+                            </Grid>
+                            <TextBlock Margin="0,16,0,0" Text="Severity summary" Style="{StaticResource FieldLabelStyle}" />
+                            <TextBlock Margin="0,4,0,0" Text="{Binding SeveritySummaryLabel}" Style="{StaticResource BodyTextStyle}" TextWrapping="Wrap" />
+                            <TextBlock Margin="0,13,0,0" Text="Git context" Style="{StaticResource FieldLabelStyle}" />
+                            <TextBlock Margin="0,4,0,0" Text="{Binding GitContextLabel}" Style="{StaticResource BodyTextStyle}" TextWrapping="Wrap" />
+                            <TextBlock Margin="0,13,0,0" Text="Privacy" Style="{StaticResource FieldLabelStyle}" />
+                            <TextBlock Margin="0,4,0,0"
+                                       Text="Absolute project and repository roots are redacted by default. Git context is captured at report time and is not claimed as the persisted run identity."
+                                       Style="{StaticResource BodyTextStyle}"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Margin="0,14,0,0" Padding="18" Style="{StaticResource CardBorderStyle}">
+                        <StackPanel>
+                            <TextBlock Text="Report limitations" Style="{StaticResource CardTitleStyle}" />
+                            <TextBlock Margin="0,5,0,0" Text="{Binding LimitationsLabel}" Style="{StaticResource BodyTextStyle}" />
+                            <ItemsControl Margin="0,8,0,0" ItemsSource="{Binding Report.Limitations}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Margin="0,3,0,0" Text="•  {Binding}" Style="{StaticResource BodyTextStyle}" TextWrapping="Wrap" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2">
+                    <Border Padding="18" Style="{StaticResource CardBorderStyle}">
+                        <StackPanel>
+                            <TextBlock Text="Analysis runs" Style="{StaticResource CardTitleStyle}" />
+                            <TextBlock Margin="0,5,0,0" Text="Select an older run as the comparison baseline." Style="{StaticResource BodyTextStyle}" TextWrapping="Wrap" />
+                            <ListBox Margin="0,10,0,0"
+                                     MaxHeight="260"
+                                     AutomationProperties.Name="Persisted analysis runs"
+                                     ItemsSource="{Binding AvailableRuns}"
+                                     SelectedItem="{Binding SelectedBaselineRun, Mode=TwoWay}">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Margin="0,3,0,0"
+                                                Padding="9"
+                                                Background="{DynamicResource SurfaceAltBrush}"
+                                                BorderBrush="{DynamicResource BorderBrush}"
+                                                BorderThickness="1"
+                                                CornerRadius="7"
+                                                AutomationProperties.Name="{Binding AccessibilityName}">
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding StatusLabel}" Style="{StaticResource CardTitleStyle}" />
+                                                <TextBlock Margin="0,3,0,0" Text="{Binding SummaryLabel}" Style="{StaticResource BodyTextStyle}" TextWrapping="Wrap" />
+                                                <TextBlock Margin="0,3,0,0" Text="{Binding ScanIdLabel}" Foreground="{DynamicResource SubtleTextBrush}" FontFamily="Consolas" FontSize="10" />
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                            <Button Margin="0,12,0,0"
+                                    AutomationProperties.Name="Compare selected analysis runs"
+                                    Command="{Binding CompareCommand}"
+                                    Content="Compare selected baseline with current"
+                                    Style="{StaticResource SecondaryButtonStyle}" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Margin="0,14,0,0" Padding="18" Style="{StaticResource CardBorderStyle}" Visibility="{Binding HasComparison, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <StackPanel>
+                            <TextBlock Text="Comparison" Style="{StaticResource CardTitleStyle}" />
+                            <TextBlock Margin="0,5,0,0" Text="{Binding ComparisonSummaryLabel}" Style="{StaticResource BodyTextStyle}" />
+                            <TextBlock Margin="0,5,0,0" Text="{Binding ComparisonReliabilityLabel}" Foreground="{DynamicResource WarningBrush}" TextWrapping="Wrap" />
+                            <ItemsControl Margin="0,9,0,0" ItemsSource="{Binding Comparison.Limitations}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Margin="0,2,0,0" Text="•  {Binding}" Style="{StaticResource BodyTextStyle}" TextWrapping="Wrap" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

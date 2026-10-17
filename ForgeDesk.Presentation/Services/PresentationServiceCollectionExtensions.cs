@@ -8,6 +8,7 @@ public static class PresentationServiceCollectionExtensions
 {
     public static IServiceCollection AddForgeDeskPresentation(this IServiceCollection services)
     {
+        services.AddSingleton<IGitRepositoryPresentationService, GitRepositoryPresentationService>();
         services.AddSingleton<HomeViewModel>();
         services.AddSingleton<ProjectsViewModel>();
         services.AddSingleton<AnalysisViewModel>();
@@ -15,6 +16,8 @@ public static class PresentationServiceCollectionExtensions
         services.AddSingleton<SymbolDetailsViewModel>();
         services.AddSingleton<DependencyGraphViewModel>();
         services.AddSingleton<IssueExplorerViewModel>();
+        services.AddSingleton<GitChangesViewModel>();
+        services.AddSingleton<ReportsViewModel>();
         services.AddSingleton<SettingsViewModel>();
         services.AddSingleton<UnavailablePageViewModelFactory>();
         services.AddSingleton<MainWindowViewModel>();
