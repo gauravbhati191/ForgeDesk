@@ -26,6 +26,7 @@ public sealed class InfrastructurePersistenceTests
         Assert.NotNull(scope.ServiceProvider.GetRequiredService<IAnalysisEngine>());
         Assert.NotNull(scope.ServiceProvider.GetRequiredService<IGitRepositoryService>());
         Assert.NotNull(scope.ServiceProvider.GetRequiredService<IGitRepositoryReader>());
+        Assert.NotNull(scope.ServiceProvider.GetRequiredService<IDatabaseBackupService>());
         Assert.True(File.Exists(databasePath));
     }
 

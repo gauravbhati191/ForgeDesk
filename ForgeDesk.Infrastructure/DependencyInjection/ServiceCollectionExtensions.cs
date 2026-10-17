@@ -26,6 +26,7 @@ public static class ServiceCollectionExtensions
         });
 
         services.AddSingleton<IClock, SystemClock>();
+        services.AddSingleton<IDatabaseBackupService, SqliteDatabaseBackupService>();
         services.AddScoped<IProjectRepository, ProjectRepository>();
         services.AddScoped<IScanRepository, ScanRepository>();
         services.AddScoped<ISettingRepository, SettingRepository>();
