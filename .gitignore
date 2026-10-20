@@ -16,6 +16,9 @@
 logs/
 artifacts/
 
+# Local poster source, previews, and exported A2 deliverables (never publish)
+/Poster/
+
 # IDE/editor files
 .vscode/
 .idea/
