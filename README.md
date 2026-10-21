@@ -37,6 +37,7 @@
 ```text
 ForgeDesk/
 ├── 🖥️ ForgeDesk.App            # WPF host, Composition root, DI, Window Lifecycle, Native Folder Picker
+├── 🌐 ForgeDesk.Web            # Browser dashboard host, REST API, responsive multi-view developer studio
 ├── 🎨 ForgeDesk.Presentation   # MVVM ViewModels, Custom Controls, Resource Dictionaries, Themes
 ├── ⚙️ ForgeDesk.Application    # Use Cases, Orchestration, Validation, DTOs, Project Workspace Service
 ├── 💎 ForgeDesk.Domain         # Core Entities, Value Objects, Domain Enums, Invariants
@@ -85,6 +86,30 @@ dotnet build ForgeDesk.sln --configuration Release
 # 3. Launch the desktop application
 dotnet run --project ForgeDesk.App/ForgeDesk.App.csproj --configuration Release
 ```
+
+### 🌐 Running the browser version
+
+ForgeDesk also includes an independent **ASP.NET Core .NET 8** web host. It does
+not reference the WPF `ForgeDesk.App` or `ForgeDesk.Presentation` projects; it
+reuses the shared Domain, Application, Infrastructure, Analysis, and Graph
+layers instead.
+
+```powershell
+# Start the web dashboard at http://localhost:5000
+dotnet run --project ForgeDesk.Web/ForgeDesk.Web.csproj --configuration Release
+```
+
+Open `http://localhost:5000` in a browser. The web dashboard supports local
+project onboarding, persisted scan status, background Roslyn analysis with
+progress polling, code-health findings, an SVG dependency graph with filters,
+read-only Git context, and JSON/HTML/CSV report downloads. The folder paths are
+resolved by the machine running `ForgeDesk.Web`, so the web host should be run
+where the source repositories are accessible.
+
+The desktop and web hosts can be run independently against the same shared
+ForgeDesk data store. To select a different database location, set
+`ForgeDesk__DatabasePath` (or `ForgeDesk:DatabasePath` in configuration) before
+starting the web host.
 
 ### 🔎 Analysis, graph, and issue workspace
 

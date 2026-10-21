@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0d1117">
+  <title>ForgeDesk Web</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div id="app-shell" class="app-shell">
+    <aside id="sidebar" class="sidebar" aria-label="ForgeDesk navigation">
+      <div class="sidebar-brand">
+        <div class="brand-mark">F</div>
+        <div class="brand-copy"><strong>ForgeDesk</strong><span>Developer studio</span></div>
+        <button id="sidebar-collapse" class="icon-button sidebar-collapse" type="button" title="Collapse sidebar" aria-label="Collapse sidebar">‹</button>
+      </div>
+
+      <div class="workspace-switcher">
+        <label for="project-selector">ACTIVE PROJECT</label>
+        <select id="project-selector" aria-label="Active project">
+          <option value="">Select a project</option>
+        </select>
+        <button id="open-onboarding" class="switcher-action" type="button"><span>＋</span> Add project</button>
+      </div>
+
+      <nav class="sidebar-nav" aria-label="Workspace views">
+        <div class="nav-group-label">WORKSPACE</div>
+        <a class="nav-item" href="#projects" data-route="projects"><span class="nav-icon">▦</span><span class="nav-label">Projects &amp; Onboarding</span></a>
+        <a class="nav-item" href="#explorer" data-route="explorer"><span class="nav-icon">⌘</span><span class="nav-label">Code Explorer</span></a>
+        <a class="nav-item" href="#graph" data-route="graph"><span class="nav-icon">⌁</span><span class="nav-label">Dependency Graph</span></a>
+        <a class="nav-item" href="#health" data-route="health"><span class="nav-icon">◈</span><span class="nav-label">Code Health</span></a>
+        <a class="nav-item" href="#git" data-route="git"><span class="nav-icon">⑂</span><span class="nav-label">Git &amp; History</span></a>
+        <a class="nav-item" href="#reports" data-route="reports"><span class="nav-icon">▤</span><span class="nav-label">Reports &amp; Export</span></a>
+        <div class="nav-group-label nav-group-settings">SYSTEM</div>
+        <a class="nav-item" href="#settings" data-route="settings"><span class="nav-icon">⚙</span><span class="nav-label">Settings &amp; Theme</span></a>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <div class="local-status"><span class="status-dot"></span><div><strong>Local-first</strong><span>Source stays on this host</span></div></div>
+        <button id="sidebar-help" class="sidebar-help" type="button">? <span>About ForgeDesk Web</span></button>
+      </div>
+    </aside>
+
+    <section class="app-frame">
+      <header class="topbar">
+        <div class="topbar-leading">
+          <button id="mobile-menu" class="icon-button mobile-menu" type="button" title="Open navigation" aria-label="Open navigation">☰</button>
+          <div id="breadcrumbs" class="breadcrumbs"><span>ForgeDesk</span><b>/</b><strong>Projects</strong></div>
+        </div>
+        <div class="topbar-center">
+          <div id="header-project-name" class="header-project-name">No project selected</div>
+          <span id="header-scan-badge" class="status-badge neutral">No scan</span>
+        </div>
+        <div class="topbar-actions">
+          <span id="connection-status" class="connection-status"><span class="status-dot"></span>Connecting</span>
+          <button id="refresh-all" class="topbar-button" type="button" title="Refresh current view">↻ <span>Refresh</span></button>
+          <button id="header-theme" class="topbar-icon" type="button" title="Toggle theme" aria-label="Toggle theme">☾</button>
+        </div>
+      </header>
+
+      <main id="app-view" class="view-viewport" aria-live="polite"></main>
+    </section>
+
+    <aside id="inspector-drawer" class="inspector-drawer" aria-label="Entity inspector" aria-hidden="true">
+      <div class="inspector-header"><div><span class="eyebrow">Inspector</span><h2 id="inspector-title">Nothing selected</h2></div><button id="close-inspector" class="icon-button" type="button" title="Close inspector" aria-label="Close inspector">×</button></div>
+      <div id="inspector-content" class="inspector-content"><div class="inspector-empty">Select a symbol, finding, or connection to inspect its details.</div></div>
+    </aside>
+  </div>
+
+  <div id="drawer-backdrop" class="drawer-backdrop" aria-hidden="true"></div>
+  <div id="modal-root"></div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/app.js" type="module"></script>
+</body>
+</html>

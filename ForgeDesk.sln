@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ForgeDesk.UnitTests", "Forg
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ForgeDesk.IntegrationTests", "ForgeDesk.IntegrationTests\ForgeDesk.IntegrationTests.csproj", "{64B8917C-45D7-4552-A2DC-90D35B52194C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ForgeDesk.Web", "ForgeDesk.Web\ForgeDesk.Web.csproj", "{BED406BF-E73B-48BF-9611-055FF45E0940}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -66,5 +68,9 @@ Global
 		{64B8917C-45D7-4552-A2DC-90D35B52194C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{64B8917C-45D7-4552-A2DC-90D35B52194C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{64B8917C-45D7-4552-A2DC-90D35B52194C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BED406BF-E73B-48BF-9611-055FF45E0940}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BED406BF-E73B-48BF-9611-055FF45E0940}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BED406BF-E73B-48BF-9611-055FF45E0940}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BED406BF-E73B-48BF-9611-055FF45E0940}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
