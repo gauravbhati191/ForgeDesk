@@ -25,3 +25,8 @@ artifacts/
 # IDE/editor files
 .vscode/
 .idea/
+
+# Local phase prompts
+phase3_prompt.md
+phase4_prompt.md
+phase5_prompt.md
