@@ -19,6 +19,9 @@ artifacts/
 # Local poster source, previews, and exported A2 deliverables (never publish)
 /Poster/
 
+# Local academic paper and two-member poster deliverables (never publish)
+/New/
+
 # IDE/editor files
 .vscode/
 .idea/
